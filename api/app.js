@@ -119,18 +119,18 @@ app.use("/api/chats", chatRoute);
 app.use("/api/messages", messageRoute);
 
 // ===== Serve static files in production =====
-if (process.env.NODE_ENV === "production") {
-  const clientBuildPath = path.join(dirname, "../client/dist");
-  app.use(express.static(clientBuildPath));
+// if (process.env.NODE_ENV === "production") {
+//   const clientBuildPath = path.join(dirname, "../client/dist");
+//   app.use(express.static(clientBuildPath));
 
-  app.get("*", (req, res) => {
-    if (req.url.startsWith("/assets/")) {
-      const assetPath = path.join(clientBuildPath, req.url);
-      if (path.extname(assetPath)) return res.sendFile(assetPath);
-    }
-    res.sendFile(path.join(clientBuildPath, "index.html"));
-  });
-}
+//   app.get("*", (req, res) => {
+//     if (req.url.startsWith("/assets/")) {
+//       const assetPath = path.join(clientBuildPath, req.url);
+//       if (path.extname(assetPath)) return res.sendFile(assetPath);
+//     }
+//     res.sendFile(path.join(clientBuildPath, "index.html"));
+//   });
+// }
 
 // ===== Start server =====
 const PORT = process.env.PORT || 8800;
