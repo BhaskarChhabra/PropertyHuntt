@@ -1,8 +1,8 @@
 import axios from "axios";
 
 const apiRequest = axios.create({
-  baseURL: "http://localhost:8800/api", // ✅ Use your backend API URL
-  withCredentials: true, // ✅ Keep if you're using cookies/session auth
+  baseURL: `${import.meta.env.VITE_API_URL}/api`, // This uses your Vercel variable
+  withCredentials: true,
 });
 
 export default apiRequest;
