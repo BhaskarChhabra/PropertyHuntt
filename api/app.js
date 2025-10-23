@@ -30,14 +30,18 @@ axios.defaults.proxy = false;
 axios.defaults.httpAgent = new httpAgent.Agent({ keepAlive: true, proxy: false });
 axios.defaults.httpsAgent = new https.Agent({ keepAlive: true, proxy: false });
 
-// Allowed origins
-const allowedOrigins = ["http://localhost:5173"];
-if (process.env.CLIENT_URL) allowedOrigins.push(process.env.CLIENT_URL);
+// Allowed origins (Updated to use deployed URLs)
+const allowedOrigins = [
+    "http://localhost:5173", // Local Development
+    "https://property-huntt-prvt.vercel.app" // Vercel Frontend URL
+];
+// We removed the process.env.CLIENT_URL check since you provided the exact URL
 
 // Middlewares
 app.use(
     cors({
         origin(origin, callback) {
+            // Allows requests with no origin (like mobile apps or curl) and allowed origins
             if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
             return callback(new Error("Not allowed by CORS"));
         },
@@ -47,10 +51,10 @@ app.use(
 app.use(express.json());
 app.use(cookieParser());
 
-// ===== Socket.IO Setup (Waisa hi) =====
+// ===== Socket.IO Setup (Updated with Vercel URL) =====
 const io = new Server(server, {
     cors: {
-        origin: allowedOrigins,
+        origin: allowedOrigins, // Using the updated allowedOrigins array
         methods: ["GET", "POST", "PUT", "DELETE"],
         credentials: true,
     },
@@ -164,21 +168,7 @@ app.use("/api/messages", messageRoute);
 app.use("/api/map", mapRoute);
 app.use('/api/ai', aiRoute); 
 
-// --- 🛑 REMOVED FRONTEND SERVING LOGIC (FIX) 🛑 ---
-// The following block caused the 'ENOENT' error on Render because the client/dist files 
-// were not uploaded with the API service.
-/*
-if (process.env.NODE_ENV === "production") {
-    const clientBuildPath = path.join(dirname, "../client/dist");
-    app.use(express.static(clientBuildPath));
-    app.get("*", (req, res) => {
-        res.sendFile(path.join(clientBuildPath, "index.html"));
-    });
-}
-*/
-// --- 🛑 END FIX 🛑 ---
-
-// --- Health Check Route (Optional, but recommended for debugging) ---
+// --- Health Check Route ---
 app.get("/", (req, res) => {
     res.status(200).json({ message: "PropertyHunt API is running successfully on Render!" });
 });
