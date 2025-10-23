@@ -28,8 +28,8 @@ const InvestmentPage = () => {
     setAnalysis("");
 
     try {
-      const res = await axios.post("http://localhost:8800/api/ai/invest", formData);
-
+      // const res = await axios.post("http://localhost:8800/api/ai/invest", formData);
+      const res = await axios.post("https://propertyhunttprvt.onrender.com/api/ai/invest", formData);
       setAnalysis(res.data.analysis);
     } catch (err) {
       console.error(err);
