@@ -1,7 +1,7 @@
 import React from 'react';
 import { Users, Home, Star, ShieldCheck } from 'lucide-react';
 import { motion } from 'framer-motion';
-import './highlightsSection.scss';
+import './HighlightsSection.scss';
 
 // Data for the stat cards to keep the JSX clean
 const statsData = [
