@@ -30,19 +30,30 @@ axios.defaults.proxy = false;
 axios.defaults.httpAgent = new httpAgent.Agent({ keepAlive: true, proxy: false });
 axios.defaults.httpsAgent = new https.Agent({ keepAlive: true, proxy: false });
 
-// Allowed origins (Updated to use deployed URLs)
+// Allowed origins (Updated and simplified for clarity)
+const VERCEL_CLIENT = "https://property-huntt-prvt.vercel.app";
+
 const allowedOrigins = [
-    "http://localhost:5173", // Local Development
-    "https://property-huntt-prvt.vercel.app" // Vercel Frontend URL
+    "http://localhost:5173", // Local Development
+    VERCEL_CLIENT, // Vercel Frontend URL
 ];
-// We removed the process.env.CLIENT_URL check since you provided the exact URL
+
+// FIX 1: Add dynamic environment variable if it exists (e.g. for Vercel preview deploys)
+if (process.env.CLIENT_URL && !allowedOrigins.includes(process.env.CLIENT_URL)) {
+    allowedOrigins.push(process.env.CLIENT_URL);
+}
+
 
 // Middlewares
 app.use(
     cors({
         origin(origin, callback) {
-            // Allows requests with no origin (like mobile apps or curl) and allowed origins
-            if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
+            // Allows requests with no origin (like server-to-server or cURL) and allowed origins
+            if (!origin || allowedOrigins.includes(origin)) {
+                return callback(null, true);
+            }
+            // Log the rejected origin for debugging
+            console.error(`CORS BLOCKED: Origin ${origin} not in allowed list.`);
             return callback(new Error("Not allowed by CORS"));
         },
         credentials: true,
@@ -51,10 +62,11 @@ app.use(
 app.use(express.json());
 app.use(cookieParser());
 
-// ===== Socket.IO Setup (Updated with Vercel URL) =====
+// ===== Socket.IO Setup (FIXED) =====
 const io = new Server(server, {
     cors: {
-        origin: allowedOrigins, // Using the updated allowedOrigins array
+        // Use the same allowedOrigins array for Socket.IO
+        origin: allowedOrigins, 
         methods: ["GET", "POST", "PUT", "DELETE"],
         credentials: true,
     },
@@ -170,7 +182,7 @@ app.use('/api/ai', aiRoute);
 
 // --- Health Check Route ---
 app.get("/", (req, res) => {
-    res.status(200).json({ message: "PropertyHunt API is running successfully on Render!" });
+    res.status(200).json({ message: "PropertyHunt API is running successfully on Render!" });
 });
 
 
