@@ -1,0 +1,305 @@
+@use "sass:color";
+
+// === Keyframe Animations ===
+@keyframes sparkle-float {
+  0%, 100% { transform: translateY(0) scale(1); opacity: 1; }
+  50% { transform: translateY(-5px) scale(1.2); opacity: 0.7; }
+}
+
+@keyframes float-breathe {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+@keyframes gradient-glow {
+  0% { box-shadow: 0 0 5px rgba(79, 70, 229, 0.2), 0 0 10px rgba(79, 70, 229, 0.1); }
+  50% { box-shadow: 0 0 15px rgba(79, 70, 229, 0.3), 0 0 25px rgba(139, 92, 246, 0.25); }
+  100% { box-shadow: 0 0 5px rgba(79, 70, 229, 0.2), 0 0 10px rgba(79, 70, 229, 0.1); }
+}
+
+@keyframes shimmer-gradient {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 100% 50%; }
+}
+
+// --- NEW: Underline Loading Animation ---
+@keyframes underline-loading {
+  0% { transform: translateX(-100%) scaleX(0.5); }
+  50% { transform: translateX(0) scaleX(1); }
+  100% { transform: translateX(100%) scaleX(0.5); }
+}
+
+// === Variables ===
+$primary-color: #4F46E5;
+$secondary-color: #8B5CF6;
+$tertiary-color: #3B82F6; // Used for stats and step numbers
+$text-dark: #111827;
+$text-light: #4B5563;
+$background-light: #ffffff;
+$border-color: #E5E7EB;
+$green-light: #D1FAE5;
+$green-dark: #059669;
+$sparkle-color: #FBBF24;
+$rating-star-color: #F59E0B; // Yellow for star rating
+
+// === Main Section Styling ===
+.how-it-works-section {
+  padding: 5rem 1.5rem;
+  background-color: $background-light;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden; // Prevent overflow from animations
+}
+
+// --- NEW: Centering Container ---
+.section-container {
+  max-width: 1200px; // Max width for content
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+// --- NEW: Header Section Styling ---
+.section-header {
+  text-align: center;
+  margin-bottom: 4rem; // Space below header
+
+  .pre-title-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: $primary-color;
+    background-color: color.adjust($primary-color, $lightness: 35%); // Lighter blue/violet
+    border: 1px solid color.adjust($primary-color, $lightness: 25%);
+    padding: 0.4rem 1rem;
+    border-radius: 999px; // Pill shape
+    margin-bottom: 1rem;
+
+    svg {
+      color: $primary-color; // Match text color
+    }
+  }
+
+  .main-title {
+    font-size: 4rem; // Larger title
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    // Gradient Text
+    background: linear-gradient(90deg, $primary-color 0%, $secondary-color 100%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    display: inline-block; // Needed for underline positioning
+    position: relative;
+  }
+
+  .title-underline {
+    height: 4px;
+    width: 80px; // Width of the underline bar
+    margin: 0 auto 1.5rem auto; // Center it and add space below
+    border-radius: 2px;
+    background: linear-gradient(90deg, $primary-color 0%, $secondary-color 100%);
+    position: relative;
+    overflow: hidden; // Hide the loading bar outside bounds
+
+    // The moving "loading" bar effect
+    &::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: 100%; // Same width as parent
+      background: white; // Or a slightly lighter gradient color
+      opacity: 0.6;
+      border-radius: 2px;
+      animation: underline-loading 1.5s ease-in-out infinite;
+    }
+  }
+
+  .section-description {
+    font-size: 1.6rem;
+    // color: $text-light;
+    max-width: 550px;
+    margin: 0 auto 2rem auto; // Space below description
+    line-height: 1.7;
+
+    span { // Style "AI-powered"
+      color: $tertiary-color; // Use the light blue color
+      font-weight: 600;
+    }
+  }
+
+  .stats-row {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+
+    .stat-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background-color: #F3F4F6; // Light grey background
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: $text-light;
+      border: 1px solid $border-color;
+
+      svg {
+        // Specific colors for icons
+        &:first-child { // Applies to Star, CheckCircle, Clock
+          &[stroke*="star"] { color: $rating-star-color; } // Star
+          &[stroke*="check"] { color: $green-dark; } // CheckCircle
+          &[stroke*="clock"] { color: $tertiary-color; } // Clock
+        }
+      }
+    }
+  }
+}
+// --- END HEADER STYLES ---
+
+
+.steps-wrapper {
+  display: flex;
+  justify-content: space-between; // Default for large screens
+  align-items: flex-start; // Align items to the top
+  max-width: 1100px;
+  width: 100%;
+  position: relative;
+
+  // REMOVED: The ::before line is visually replaced by arrows now
+}
+
+// === Individual Step Styling ===
+.step-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  width: 300px; // Keep fixed width for items
+  position: relative;
+  z-index: 1;
+  transition: all 0.45s cubic-bezier(0.25, 0.8, 0.25, 1);
+  animation: float-breathe 4s ease-in-out infinite;
+
+  // Hover styles remain the same
+  &:hover {
+    transform: translateY(-12px) scale(1.03);
+    animation: none;
+    filter: brightness(1.05);
+
+    .step-icon-container {
+      background-image: linear-gradient(135deg, $tertiary-color, $primary-color, $secondary-color);
+      background-size: 200% 200%;
+      animation: shimmer-gradient 3s linear infinite, gradient-glow 2s ease-in-out infinite;
+      box-shadow: 0 15px 35px rgba($primary-color, 0.25);
+      transform: scale(1.1);
+
+      .step-icon {
+        color: white;
+        transform: rotate(12deg) scale(1.15);
+      }
+    }
+    h3 { color: $primary-color; text-shadow: 0 0 10px rgba($primary-color, 0.3); }
+    .step-content::after { transform: translateX(-50%) scaleX(1); box-shadow: 0 0 10px rgba($primary-color, 0.2); }
+    .step-completed-badge { transform: scale(1.25); background-color: lighten($green-light, 8%); box-shadow: 0 0 20px rgba($green-dark, 0.3); }
+  }
+
+  // Visuals and content styles remain largely the same
+  .step-visuals { position: relative; margin-bottom: 1.5rem; }
+  .step-number-badge {
+    position: absolute;
+    top: -35px; // Adjust based on icon size if needed
+    left: 50%;
+    transform: translateX(-50%);
+    width: 28px;
+    height: 28px;
+    background-color: $tertiary-color;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.875rem;
+    font-weight: 600;
+    border: 3px solid $background-light;
+
+    .sparkle-icon {
+      position: absolute; color: $sparkle-color; width: 16px; height: 16px; animation: sparkle-float 3s ease-in-out infinite;
+      &.top { top: -10px; right: -15px; animation-delay: 0.5s; }
+      &.bottom { bottom: -10px; left: -15px; transform: scaleX(-1); }
+    }
+  }
+  .step-icon-container {
+    width: 100px; height: 100px; background-color: #F3F4F6; border: 1px solid $border-color; border-radius: 24px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03); transition: background-image 0.4s ease, box-shadow 0.4s ease, transform 0.3s ease;
+    .step-icon { width: 44px; height: 44px; color: $tertiary-color; transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1) 0.1s; }
+  }
+  .step-content {
+    position: relative;
+    h3 { font-size: 1.25rem; font-weight: 700; color: $text-dark; margin-bottom: 0.5rem; transition: color 0.4s ease 0.05s; }
+    p { font-size: 0.95rem; color: $text-light; line-height: 1.6; margin-bottom: 1.5rem; max-width: 280px; }
+    .step-completed-badge { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; background-color: $green-light; border-radius: 50%; transition: all 0.3s ease;
+      svg { width: 20px; height: 20px; color: $green-dark; }
+    }
+    &::after { content: ''; position: absolute; bottom: 0; left: 50%; width: 40px; height: 3px; background-color: $tertiary-color; border-radius: 2px; transform: translateX(-50%) scaleX(0); transform-origin: center; transition: transform 0.3s ease-in-out 0.15s; }
+  }
+
+  // Active state remains the same
+  &.active {
+    transform: scale(1.03);
+    .step-icon-container { background-image: linear-gradient(135deg, $primary-color, $secondary-color); box-shadow: 0 10px 25px rgba($primary-color, 0.3);
+      .step-icon { color: white; }
+    }
+    h3 { color: $tertiary-color; }
+    .step-content::after { transform: translateX(-50%) scaleX(1); }
+  }
+}
+
+// --- NEW: Arrow Styling ---
+.step-arrow {
+  flex-shrink: 0; // Prevent arrows from shrinking
+  align-self: center; // Vertically center the arrow relative to steps
+  margin-top: 30px; // Adjust vertical position (align with icon centers roughly)
+  color: $border-color; // Light grey arrow color
+  z-index: 0; // Behind step items if overlapping
+
+  // Hide arrows on smaller screens where steps stack
+  @media (max-width: 1024px) {
+    display: none;
+  }
+}
+
+
+// === Responsive Adjustments ===
+@media (max-width: 1024px) {
+  .steps-wrapper {
+    flex-direction: column;
+    align-items: center;
+    gap: 4rem; // Keep gap between stacked items
+  }
+
+  .step-item {
+    width: 100%;
+    max-width: 350px;
+  }
+}
+
+// Smaller mobile adjustments if needed
+@media (max-width: 640px) {
+  .section-header {
+    .main-title { font-size: 2rem; }
+    .section-description { font-size: 1rem; }
+    .stats-row { gap: 1rem; }
+  }
+  .step-item {
+    width: 95%;
+    max-width: none;
+  }
+}

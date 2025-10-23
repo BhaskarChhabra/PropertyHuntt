@@ -1,0 +1,406 @@
+@use "sass:color"; // For color.adjust()
+
+/* =================================
+    RESPONSIVE MIXINS (Fallback)
+   ================================= */
+@mixin sm {
+  @media (max-width: 640px) { @content; }
+}
+@mixin md {
+  @media (max-width: 768px) { @content; }
+}
+@mixin lg {
+  @media (max-width: 1024px) { @content; }
+}
+
+/* =================================
+    1. VARIABLES
+   ================================= */
+$primary-color: #6a63fd;
+$brand-violet: #8B5CF6;
+$primary-color-light: #f0f0ff;
+$primary-color-border: #e0dfff;
+$text-dark: #1f2937;
+$text-light: #6b7280;
+$text-grey: #d1d5db;
+$card-bg: #ffffff;
+$section-bg: #f9fafb;
+$badge-color: #f59e0b;
+$card-border-radius: 24px;
+$card-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+$card-shadow-active: 0 8px 20px rgba($primary-color, 0.1);
+$cta-green: #10b981;
+$cta-blue: #3b82f6;
+$cta-purple: #a855f7;
+$border-color: #E5E7EB; // <<< Variable is defined here
+
+/* =================================
+    2. MAIN SECTION STYLING
+   ================================= */
+.excellence-section {
+  padding: 4rem 1.5rem;
+  background-color: $section-bg;
+  text-align: center;
+
+  .section-pre-title {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: $primary-color;
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    background-color: $primary-color-light;
+    border: 1px solid $primary-color-border;
+    padding: 0.5rem 1rem;
+    border-radius: 999px;
+  }
+
+  .section-title-main {
+    font-size: 4rem;
+    font-weight: 700;
+    color: $text-dark;
+    margin-bottom: 1rem;
+    position: relative;
+    padding-bottom: 0.75rem;
+
+    span {
+      background: linear-gradient(90deg, $primary-color 0%, $brand-violet 100%);
+      background-clip: text;
+      -webkit-background-clip: text;
+      color: transparent;
+      position: relative;
+
+      &::after {
+        content: '';
+        position: absolute;
+        bottom: -12px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 100%;
+        max-width: 150px;
+        height: 5px;
+        background: linear-gradient(90deg, $primary-color 0%, $brand-violet 100%);
+        border-radius: 3px;
+      }
+    }
+  }
+
+  .excellence-subtitle {
+    font-size: 1.125rem;
+    color: $text-light;
+    max-width: 600px;
+    margin: 0 auto 3rem auto;
+
+    span {
+      color: $primary-color;
+      font-weight: 500;
+    }
+  }
+
+  .excellence-stats {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2rem;
+    margin-top: -1rem;
+    margin-bottom: 3rem;
+    color: $text-light;
+    font-weight: 500;
+    font-size: 0.9rem;
+    flex-wrap: wrap;
+
+    span {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+  }
+}
+
+/* =================================
+    3. FEATURE CARDS GRID
+   ================================= */
+.feature-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+  max-width: 1280px;
+  margin: 0 auto;
+
+  @media (max-width: 1024px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @media (max-width: 767px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* =================================
+    4. SPARKLE BADGE MIXIN
+   ================================= */
+@mixin sparkle-badge {
+  content: "🌟";
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  font-size: 0.8rem;
+  background: $badge-color;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid $card-bg;
+  color: white;
+  transform: scale(0);
+  transition: transform 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+}
+
+/* =================================
+    5. INDIVIDUAL CARD STYLING
+   ================================= */
+.feature-card {
+  background: $card-bg;
+  border-radius: $card-border-radius;
+  padding: 1.5rem;
+  text-align: left;
+  box-shadow: $card-shadow;
+  border: 1px solid transparent;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  position: relative;
+  transition: all 0.3s ease-out;
+
+  .card-number {
+    position: absolute;
+    top: 1.25rem;
+    right: 1.25rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: $text-grey;
+  }
+
+  .card-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: $primary-color-light;
+    margin-bottom: 1rem;
+    position: relative;
+    font-size: 2rem;
+    color: $primary-color;
+
+    &::before {
+      @include sparkle-badge;
+    }
+  }
+
+  h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: $text-dark;
+    margin-bottom: 0.75rem;
+  }
+
+  p {
+    font-size: 1rem;
+    color: $text-light;
+    line-height: 1.6;
+    flex-grow: 1;
+    margin-bottom: 1rem;
+  }
+
+  .explore-link {
+    font-size: 1rem;
+    font-weight: 500;
+    color: $primary-color;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: all 0.2s ease;
+
+    &::after {
+      content: "→";
+      transition: all 0.3s ease;
+      margin-left: 0.5rem;
+    }
+  }
+
+  /* --- Active & Hover States --- */
+  @mixin active-arrow {
+    &::after {
+      content: "→";
+      background: $primary-color-light;
+      color: $primary-color;
+      border-radius: 50%;
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transform: translateX(0);
+    }
+  }
+
+  &:nth-child(2) {
+    border: 1px solid $primary-color-border;
+    box-shadow: $card-shadow-active;
+    transform: translateY(-5px);
+
+    .explore-link {
+      @include active-arrow;
+    }
+  }
+
+  &:hover {
+    transform: translateY(-8px);
+    border: 1px solid $primary-color-border;
+    box-shadow: $card-shadow-active;
+
+    .explore-link {
+      @include active-arrow;
+    }
+
+    .card-icon::before {
+      transform: scale(1);
+    }
+  }
+}
+
+/* =================================
+    6. CTA SECTION STYLES
+   ================================= */
+.cta-section {
+  background: $card-bg;
+  border-radius: $card-border-radius;
+  padding: 3rem 2rem;
+  margin-top: 4rem;
+  text-align: center;
+  box-shadow: $card-shadow;
+  border: 1px solid $border-color; // <<< Line 293 is likely here
+  max-width:    1500px;
+  margin-left: auto;
+  margin-right: auto;
+
+  .cta-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, $primary-color 0%, $brand-violet 100%);
+    color: white;
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 4px 10px rgba($primary-color, 0.3);
+  }
+
+  .cta-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: $text-dark;
+    margin-bottom: 0.75rem;
+
+    span {
+      background: linear-gradient(90deg, $primary-color 0%, $brand-violet 100%);
+      background-clip: text;
+      -webkit-background-clip: text;
+      color: transparent;
+    }
+  }
+
+  .cta-description {
+    font-size: 1.125rem;
+    color: $text-light;
+    max-width: 550px;
+    margin: 0 auto 2rem auto;
+    line-height: 1.7;
+  }
+
+  .cta-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 2.5rem;
+    flex-wrap: wrap;
+
+    .cta-button {
+      padding: 0.875rem 1.75rem;
+      font-size: 1rem;
+      font-weight: 600;
+      border-radius: 12px;
+      text-decoration: none;
+      transition: all 0.2s ease-out;
+      border: 2px solid transparent;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+
+      &.primary {
+        background: linear-gradient(90deg, $primary-color 0%, $brand-violet 100%);
+        color: white;
+        box-shadow: 0 4px 10px rgba($primary-color, 0.2);
+
+        &:hover {
+          box-shadow: 0 6px 15px rgba($primary-color, 0.3);
+          transform: translateY(-2px);
+        }
+      }
+
+      &.secondary {
+        background: $card-bg;
+        color: $primary-color;
+        border-color: $primary-color-border;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.03);
+
+        &:hover {
+          background: $primary-color-light;
+          border-color: $primary-color;
+          transform: translateY(-2px);
+        }
+      }
+    }
+  }
+
+  .cta-stats {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    color: $text-light;
+    font-weight: 500;
+    font-size: 0.875rem;
+    flex-wrap: wrap;
+
+    span {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+
+      &:nth-child(1) { color: $cta-green; }
+      &:nth-child(2) { color: $cta-blue; }
+      &:nth-child(3) { color: $cta-purple; }
+
+      // Reset color for the text itself (simple approach)
+      // We assume the text is directly inside the span after the emoji
+      // This might need adjustment based on exact HTML
+      &::after {
+         content: ""; // Clear potential default content if any
+         color: $text-light; // Apply text color (overrides the dot color for text part)
+         // Note: This relies on text nodes inheriting the span's base color
+         // and this rule overriding only the text node.
+         // A more robust way is to wrap text in another span if needed.
+      }
+    }
+  }
+}

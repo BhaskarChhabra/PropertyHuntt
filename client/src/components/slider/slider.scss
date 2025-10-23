@@ -1,0 +1,127 @@
+@use "../../responsive.scss" as *;
+
+.slider {
+    // Takes full width/height from the parent (.fullWidthSlider)
+    width: 100%;
+    height: 100%; 
+    display: flex;
+    gap: 0; 
+    
+    // 🛑 Fullscreen Slider (Modal) Logic 🛑
+    .fullSlider {
+        position: fixed;
+        width: 100vw;
+        height: 100vh;
+        top: 0;
+        left: 0;
+        background-color: black;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        z-index: 9999;
+
+        .arrow {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            cursor: pointer;
+
+            img {
+                width: 50px;
+                transform: rotate(180deg); // Left arrow default is rotated
+                filter: brightness(0) invert(1); // Make arrow white in fullscreen
+                
+                @include md { width: 30px; }
+                @include sm { width: 20px; }
+
+                &.right { transform: rotate(0deg); } // Right arrow is standard
+            }
+        }
+        .imgContainer {
+            flex: 10;
+            height: 100%;
+
+            img {
+                width: 100%;
+                height: 100%;
+                // ✅ FINAL FIX: Use 'cover' to ensure the image fills the fullscreen modal area
+                object-fit: cover; 
+            }
+        }
+
+        .close {
+            position: absolute;
+            top: 0;
+            right: 0;
+            color: white;
+            font-size: 36px;
+            font-weight: bold;
+            padding: 50px;
+            cursor: pointer;
+        }
+    }
+
+    // 🛑 Main Display (Carousel) Logic 🛑
+    .bigImage {
+        flex: 1; 
+        width: 100%; 
+        height: 100%;
+        position: relative; /* CRITICAL: To position the manual arrows over the image */
+
+        img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; // Ensures the image fills the area provided by fullWidthSlider
+            border-radius: 10px;
+            cursor: pointer;
+        }
+    }
+    
+    // 💡 Manual arrows for the main display carousel
+    .main-arrow {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 40px;
+        height: 40px;
+        background-color: rgba(0, 0, 0, 0.4); 
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 10; 
+
+        &:hover {
+            background-color: rgba(0, 0, 0, 0.6);
+        }
+
+        img {
+            width: 20px;
+            height: 20px;
+            filter: brightness(0) invert(1); // White arrow icon
+            transform: rotate(180deg); // Left arrow icon default
+            
+            &.right { 
+                transform: rotate(0deg); 
+            }
+        }
+
+        &.left-arrow {
+            left: 15px; 
+        }
+
+        &.right-arrow {
+            right: 15px; 
+            img { transform: rotate(0deg); } 
+        }
+        
+        @include sm {
+             width: 30px;
+             height: 30px;
+             img { width: 15px; height: 15px; }
+        }
+    }
+}

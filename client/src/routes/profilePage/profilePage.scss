@@ -1,0 +1,163 @@
+@use "../../responsive.scss" as *;
+
+// --- NAYA BLUE/VIOLET THEME ---
+$brand-primary: #4F46E5; // 💙 Main Blue/Indigo
+$brand-primary-dark: #4338CA; // Hover
+$brand-violet: #8B5CF6; // 💜 Secondary Violet
+$brand-gradient: linear-gradient(90deg, $brand-primary 0%, $brand-violet 100%);
+$brand-gradient-hover: linear-gradient(
+  90deg,
+  $brand-primary-dark 0%,
+  $brand-violet 100%
+);
+
+// --- "EXTRA SUNDAR" ACCENTS ---
+$bg-chat: #fef6f3; // 🍑 Light Peach/Pink BG for Chat
+$brand-danger: #EF4444; // ❤️ Red for Logout
+$brand-danger-dark: #DC2626;
+
+// --- Standard BGs & Text ---
+$bg-page: #F9FAFB; // 🎨 Light Neutral BG
+$bg-card: #ffffff; // Cards
+$bg-accent-light: #EEF2FF; // Halka blue
+$text-dark: #111827;
+$text-light: #6B7280;
+$border-color: #E5E7EB;
+
+.profilePage {
+  display: flex;
+  height: 100%;
+  background-color: $bg-page; // 🎨 Main page background
+
+  @include md {
+    flex-direction: column;
+    overflow: scroll;
+  }
+
+  .details {
+    flex: 3;
+    overflow-y: scroll;
+    padding-bottom: 50px;
+
+    @include md {
+      flex: none;
+      height: max-content;
+    }
+
+    .wrapper {
+      padding-right: 50px;
+      display: flex;
+      flex-direction: column;
+      gap: 50px;
+
+      @include lg {
+        padding-right: 30px;
+      }
+      @include md {
+        padding-right: 20px;
+      }
+      @include sm {
+        padding: 20px; // Full padding on small screens
+      }
+
+      .title {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        h1 {
+          font-weight: 600; // Thoda bold
+          color: $text-dark;
+          font-size: 2rem;
+        }
+
+        button {
+          padding: 12px 24px;
+          cursor: pointer;
+          border: none;
+          border-radius: 8px; // Rounded
+          font-weight: 600;
+          color: white;
+          background: $brand-gradient; // 🎨 GRADIENT BUTTON
+          transition: all 0.2s ease;
+
+          &:hover {
+            background: $brand-gradient-hover;
+            box-shadow: 0 4px 10px rgba($brand-primary, 0.3);
+            transform: translateY(-2px); // Halki si hover effect
+          }
+        }
+      }
+
+      .info {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        background-color: $bg-card; // 🎨 White card background
+        padding: 30px;
+        border-radius: 12px;
+        border: 1px solid $border-color;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); // Soft shadow
+
+        span {
+          display: flex;
+          align-items: center;
+          gap: 20px;
+          font-size: 1.1rem;
+          color: $text-light;
+
+          b {
+            color: $text-dark;
+            font-weight: 600;
+          }
+        }
+
+        img {
+          width: 80px; // 🎨 Bada Avatar
+          height: 80px;
+          border-radius: 50%;
+          object-fit: cover;
+          border: 4px solid $bg-accent-light; // 🎨 Sundar border
+        }
+
+        // Logout Button
+        button {
+          width: 100%; // Full width
+          background-color: $brand-danger; // 🎨 Red button
+          border: none;
+          color: white;
+          padding: 14px 20px;
+          cursor: pointer;
+          border-radius: 8px;
+          font-weight: 600;
+          font-size: 1rem;
+          margin-top: 20px;
+          transition: all 0.2s ease;
+
+          &:hover {
+            background-color: $brand-danger-dark;
+          }
+        }
+      }
+    }
+  }
+
+  .chatContainer {
+    flex: 2;
+    background-color: $bg-chat; // 🍑 Peach background
+    height: 100%;
+    border-left: 1px solid $border-color; // Separator line
+
+    @include md {
+      flex: none;
+      height: max-content;
+      border-left: none;
+      border-top: 1px solid $border-color;
+    }
+
+    .wrapper {
+      padding: 20px; // Thodi padding
+      height: 100%;
+    }
+  }
+}

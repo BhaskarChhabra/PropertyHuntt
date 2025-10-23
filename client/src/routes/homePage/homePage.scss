@@ -1,0 +1,124 @@
+@use "../../responsive.scss" as *; 
+
+// --- Color & Gradient Variables (Fine-tuned for Image Match) ---
+$primary-purple: #6D28D9; // Deep Purple for primary action/text
+$accent-pink: #FF6F91; 
+$light-bg: #F8FAFC; 
+$card-bg: white;
+$text-dark: #1E293B; // Very dark slate for titles (exact match to image)
+$text-medium: #475569; // Medium gray for body text
+$shadow-light: rgba(0, 0, 0, 0.05);
+$search-bg-light: #F1F5F9; // Lightest gray for input/button background
+$border-light: #E2E8F0; 
+
+.homePage {
+    display: flex;
+    min-height: 100vh;
+    width: 100%;
+    // Soft, subtle background glow effect from the image
+    background: linear-gradient(135deg, rgba(239, 240, 255, 0.5) 0%, #FFFFFF 50%, rgba(240, 240, 255, 0.5) 100%); 
+    overflow-x: hidden;
+    padding-top: 50px; 
+    
+    .textContainer {
+        flex: 1;
+        
+        .wrapper { 
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 100px; // Increased gap for spacing based on visual
+            
+            @include md { padding: 0 15px; gap: 80px; }
+            
+            // --- NAYA CONTAINER JISME BACKGROUND IMAGE HAI ---
+            .heroAndStatsContainer {
+                position: relative;
+                padding-bottom: 120px; // Image ke liye neeche jagah
+
+                // Background image wala pseudo-element
+                &::after {
+                    content: '';
+                    position: absolute;
+                    bottom: 0;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    width: 100%;
+                    max-width: 1200px; // Wrapper jitna chauḍa
+                    height: 150px; // Image ki height
+                    background-image: url('/heroimage.png'); // Aapka correct path
+                    background-repeat: no-repeat;
+                    background-position: bottom center;
+                    background-size: contain;
+                    z-index: 0; // Content ke peeche
+                }
+            }
+            
+            // Sections ko background ke UPAR laayein
+            .hero-section, .stats-section {
+                position: relative;
+                z-index: 1;
+                // gap ab parent .wrapper se aa raha hai
+            }
+            // --- END OF CHANGE ---
+
+            // --- Baaki styling waise hi hai ---
+            .hero-section {
+                text-align: center;
+                margin-bottom: 50px;
+                
+                .trust-badge {
+                    padding: 6px 14px; // Slightly smaller padding
+                    background-color: #E0E7FF; // Very light blue from image
+                    border-radius: 9999px; // Pill shape
+                    font-size: 14px;
+                    color: #4338CA; // Darker blue text
+                    font-weight: 600;
+                    margin-bottom: 25px;
+                }
+
+                .title {
+                    font-size: 78px; // Larger font size for impact
+                    font-weight: 900; // Extra bold
+                    line-height: 1.1;
+                    color: $text-dark;
+                    
+                    .highlight-text {
+                        display: inline; // Changed to inline to match the image spacing
+                        // Adjusted gradient colors to match the subtle pink/purple in the image
+                        background-image: linear-gradient(90deg, #FF6F91, #9C27B0); 
+                        -webkit-background-clip: text;
+                        -webkit-text-fill-color: transparent; 
+                        color: transparent;
+                        // No margin-right here, the spacing is in JSX
+                    }
+
+                    @include lg { font-size: 60px; }
+                    @include md { font-size: 44px; }
+                }
+
+                .hero-subtitle {
+                    font-size: 19px; // Slightly larger subtitle text
+                    color: $text-medium;
+                    margin-top: 15px;
+                    margin-bottom: 30px;
+                }
+                
+                // ... (Aapke search bar ki styling yahan aayegi)
+            }
+
+            .stats-section {
+                text-align: center;
+                
+                // ... (Aapke stats section ki styling yahan aayegi)
+            }
+        }
+    }
+
+    .imgContainer {
+        display: none; 
+    }
+}
+

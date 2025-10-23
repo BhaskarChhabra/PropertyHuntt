@@ -1,0 +1,254 @@
+@use "../../responsive.scss" as *;
+
+// --- THEME VARIABLES ---
+$brand-primary: #4f46e5;
+$brand-primary-dark: #4338ca;
+$text-dark: #111827;
+$text-light: #6b7280;
+$border-color: #e5e7eb;
+$bg-page: #f9fafb; // Light grey page background
+$bg-card: #ffffff; // White for cards/panels
+
+// --- ANIMATIONS ---
+@keyframes slideUpFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// --- MAIN PAGE LAYOUT ---
+.newPostPage {
+  height: 100%;
+  display: flex;
+  gap: 20px;
+  background-color: $bg-page;
+
+  // --- FORM CONTAINER (LEFT SIDE) ---
+  .formContainer {
+    flex: 3;
+    overflow-y: auto; // Allow only this container to scroll
+    padding-right: 20px;
+
+    // --- CUSTOM SCROLLBAR ---
+    &::-webkit-scrollbar {
+      width: 8px;
+    }
+    &::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 10px;
+    }
+    &::-webkit-scrollbar-thumb {
+      background: #d1d5db;
+      border-radius: 10px;
+    }
+    &::-webkit-scrollbar-thumb:hover {
+      background: #a8b0bc;
+    }
+
+
+    .wrapper {
+      margin: 20px 0;
+
+      .headerWithButton {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+
+        h1 {
+          margin: 0;
+          font-size: 2rem;
+          font-weight: 700;
+          color: $text-dark;
+        }
+      }
+
+      form {
+        display: flex;
+        flex-direction: column;
+        gap: 24px; // Space between form sections
+
+        // --- STYLING FOR EACH SECTION (CARD) ---
+        .formSection {
+          background-color: $bg-card;
+          border: 1px solid $border-color;
+          border-radius: 12px;
+          padding: 24px;
+          box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
+          transition: transform 0.3s ease, box-shadow 0.3s ease;
+          
+          // --- Entrance Animation ---
+          opacity: 0;
+          animation: slideUpFadeIn 0.5s ease-out forwards;
+          // Note: Add style={{animationDelay: '0.Xs'}} in JSX for staggered effect
+          
+          &:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+          }
+
+          h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: $text-dark;
+            margin-top: 0;
+            margin-bottom: 20px;
+            border-bottom: 1px solid $border-color;
+            padding-bottom: 15px;
+            position: relative;
+
+            // --- Accent line ---
+            &::after {
+              content: '';
+              position: absolute;
+              left: 0;
+              bottom: -1px;
+              width: 50px;
+              height: 2px;
+              background-color: $brand-primary;
+            }
+          }
+
+          .itemsGrid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr); // 3 columns for items
+            gap: 20px;
+
+            @include md {
+              grid-template-columns: repeat(2, 1fr); // 2 columns on medium screens
+            }
+            @include sm {
+              grid-template-columns: 1fr; // 1 column on small screens
+            }
+          }
+        }
+
+        // --- MODERN FORM ITEM STYLING ---
+        .item {
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+          position: relative;
+          
+          // --- Interactive Label Highlight ---
+          &:focus-within label {
+            color: $brand-primary;
+          }
+
+          label {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: $text-light;
+            transition: color 0.3s ease;
+          }
+
+          input,
+          select {
+            width: 100%;
+            padding: 14px;
+            border-radius: 8px;
+            border: 1px solid $border-color;
+            background-color: $bg-page;
+            font-size: 1rem;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+
+            &:focus {
+              outline: none;
+              border-color: $brand-primary;
+              box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+            }
+          }
+
+          // Spanning items across grid
+          &.full-width {
+            grid-column: 1 / -1; // Take full width
+          }
+          &.half-width {
+             grid-column: span 2; // Take 2/3 width on large screens
+             @include md {
+                grid-column: 1 / -1; // Full width on medium
+             }
+          }
+        }
+        
+        // Description editor specific styling
+        .description {
+            .quill > .ql-container {
+                border-radius: 0 0 8px 8px;
+                border-color: $border-color;
+            }
+            .quill > .ql-toolbar{
+                border-radius: 8px 8px 0 0;
+                border-color: $border-color;
+            }
+        }
+
+        // --- MODERN BUTTONS ---
+        .sendButton, .useLocationBtn {
+            padding: 14px 20px;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .sendButton { // Primary Button
+            background-image: linear-gradient(to right, #4f46e5 0%, #6b63f5 100%);
+            color: white;
+            grid-column: 1 / -1; // Full width
+
+            &:hover {
+                background-image: linear-gradient(to right, #4338ca 0%, #5a52d4 100%);
+                transform: translateY(-2px);
+                box-shadow: 0 4px 10px rgba(79, 70, 229, 0.25);
+            }
+        }
+        
+        .useLocationBtn { // Secondary Button
+            background-color: $bg-card;
+            color: $brand-primary;
+            border: 1px solid $brand-primary;
+
+            &:hover {
+                background-color: #f0f2ff;
+                transform: translateY(-2px);
+            }
+        }
+      }
+    }
+  }
+
+  // --- MAP CONTAINER (RIGHT SIDE) ---
+  .sideContainer {
+    flex: 2;
+    height: calc(100vh - 40px); // Fill the height
+    margin: 20px 0;
+    position: sticky; // <-- THE MAGIC!
+    top: 20px;
+    
+    background-color: $bg-card;
+    border-radius: 12px;
+    border: 1px solid $border-color;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
+    transition: box-shadow 0.3s ease;
+    
+    &:hover {
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+    }
+
+    // Make your map component fill this container
+    // For example: .map { width: 100%; height: 100%; border-radius: 12px; }
+  }
+}
+

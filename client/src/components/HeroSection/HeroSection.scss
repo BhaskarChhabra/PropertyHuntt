@@ -1,0 +1,152 @@
+// Ensure these variables are defined in your main SCSS file (e.g., homePage.scss)
+// @use "../../responsive.scss" as *; // Assumed available
+$primary-purple: #6D28D9; 
+$accent-pink: #FF6F91; 
+$card-bg: white;
+$text-dark: #1E293B; // Very dark slate for titles
+$text-medium: #475569; // Medium gray for body text
+$shadow-light: rgba(0, 0, 0, 0.05);
+$search-bg-light: #F1F5F9; // Lightest gray for input/button background
+$border-light: #E2E8F0; 
+
+.hero-section {
+    text-align: center;
+    
+    .trust-badge {
+        display: inline-block;
+        padding: 6px 14px; // Pill shape padding
+        background-color: #E0E7FF; // Very light blue badge color
+        border-radius: 9999px; // Pill shape
+        font-size: 14px;
+        color: #4338CA; // Darker blue text
+        font-weight: 600;
+        margin-bottom: 25px;
+    }
+
+    .title {
+        font-size: 100px; // Large size
+        font-weight: 1000; // Extra bold
+        line-height: 1.1;
+        color: $text-dark;
+        
+        .highlight-text {
+            display: inline; // Crucial for the inline flow
+            // Gradient for "Find Your Perfect" (pink to purple)
+            background-image: linear-gradient(90deg, #FF6F91, #9C27B0); 
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent; 
+            color: transparent;
+        }
+        // Responsive adjustments for the title
+        @include lg { font-size: 60px; }
+        @include md { font-size: 44px; }
+    }
+
+    .hero-subtitle {
+        font-size: 24px; 
+        color: $text-medium;
+        margin-top: 15px;
+        margin-bottom: 30px;
+    }
+    
+    // --- SearchBar Mockup Styles ---
+    .new-search-mockup {
+        background: $card-bg;
+        border-radius: 20px; 
+        padding: 30px;
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+        margin-top: 40px;
+        max-width: 900px; 
+        margin-left: auto;
+        margin-right: auto;
+        
+        .type-filters {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 25px;
+            
+            @include md { flex-wrap: wrap; }
+
+            .type-btn {
+                padding: 12px 18px;
+                border-radius: 10px;
+                font-size: 14px;
+                background-color: $search-bg-light;
+                font-weight: 600;
+                color: $text-dark;
+                border: none;
+                cursor: pointer;
+                transition: background-color 0.2s;
+                
+                span { font-weight: 500; color: $text-medium; margin-left: 5px; }
+
+                &:hover { background-color: darken($search-bg-light, 3%); }
+            }
+        }
+        
+        .search-input-group {
+            display: flex;
+            gap: 10px; 
+            
+            .location-input {
+                flex: 1;
+                display: flex;
+                align-items: center;
+                background: white; 
+                border: 1px solid $border-light;
+                border-radius: 10px;
+                padding: 15px 20px; 
+
+                input {
+                    border: none;
+                    background: transparent;
+                    outline: none;
+                    width: 100%;
+                    font-size: 15px;
+                    font-weight: 500;
+                    color: $text-dark;
+                    
+                    &::placeholder { color: $text-medium; font-weight: 400; }
+                }
+            }
+            
+            .filter-btn {
+                display: flex; 
+                align-items: center;
+                padding: 15px 25px;
+                background: $search-bg-light;
+                border: none;
+                border-radius: 10px;
+                font-weight: 600;
+                font-size: 15px;
+                color: $text-dark;
+                cursor: pointer;
+            }
+            
+            .search-btn {
+                display: flex;
+                align-items: center;
+                // Purple-to-Indigo gradient for the search button
+                background-image: linear-gradient(90deg, #8B5CF6, #4F46E5); 
+                color: white;
+                padding: 15px 25px;
+                border: none;
+                border-radius: 10px;
+                font-size: 16px;
+                font-weight: 700;
+                cursor: pointer;
+                transition: opacity 0.2s;
+                
+                span { font-size: 18px; margin-left: 8px; }
+
+                &:hover { opacity: 0.9; }
+            }
+
+            @include md {
+                flex-direction: column;
+                .filter-btn, .search-btn { width: 100%; justify-content: center; }
+            }
+        }
+    }
+}

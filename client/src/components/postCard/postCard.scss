@@ -1,0 +1,109 @@
+// Variables
+$primary-color: #3498db; 
+$price-color: #e74c3c;    // Reddish price color for emphasis
+$text-color: #2c3e50;     
+$light-text-color: #7f8c8d; 
+$card-bg: #f7f7f7;        // Very light grey background for cards
+
+.postCard {
+  flex: 0 0 auto; 
+  width: 280px; 
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); // Subtle shadow
+  background-color: $card-bg;               // Light grey background
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
+  
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  }
+
+  .imageContainer {
+    position: relative;
+    height: 180px;
+    display: block; 
+    
+    .timeAgoBadge {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      // Styling similar to the image's dark badge
+      background-color: rgba(0, 0, 0, 0.7); 
+      color: white; 
+      padding: 5px 10px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 600;
+      z-index: 10;
+    }
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
+
+  .textContainer {
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    .location {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        color: $text-color; 
+        font-size: 14px;
+        font-weight: 500;
+        
+        img {
+            width: 14px;
+            height: 14px;
+        }
+    }
+
+    .titleLink {
+        text-decoration: none;
+        
+        h2 {
+            font-size: 18px;
+            color: $text-color;
+            font-weight: 700;
+            margin: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+    }
+
+    .price {
+      font-size: 18px;
+      font-weight: 700;
+      color: $price-color; 
+      margin: 5px 0 10px 0;
+    }
+
+    .features {
+      display: flex;
+      gap: 15px;
+      
+      .feature {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 14px;
+        color: $text-color; 
+        font-weight: 500;
+        
+        img {
+          width: 18px; 
+          height: 18px;
+        }
+      }
+    }
+  }
+}
