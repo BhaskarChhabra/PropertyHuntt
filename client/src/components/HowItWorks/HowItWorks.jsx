@@ -12,7 +12,7 @@ import {
   ChevronRight // For the arrows
 } from 'lucide-react';
 // -------------
-import './howItWorks.scss';
+import './HowItWorks.scss';
 
 const stepsData = [
   {
