@@ -1,125 +1,94 @@
 import React, { useState } from "react";
-// NOTE: Replaced original "./register.scss" and external imports with inline <style> block and mocks below.
-import { Link } from "react-router-dom";
-// import axios from "axios"; // Not directly used in the provided logic snippet
-// import apiRequest from "../../lib/apiRequest";
+// Assuming you have these components/hooks in your project
+import { Link, useNavigate } from "react-router-dom";
+import apiRequest from "../../lib/apiRequest"; // Assuming this is your API request utility
 
-// --- START: MOCK DEPENDENCIES (For single-file compilation) ---
-// MOCK 1: apiRequest - Simulates a network request with latency and mock responses
-const apiRequest = {
-    post: (url, data) => new Promise((resolve, reject) => {
-        setTimeout(() => {
-            if (data.username === "fail" || !data.username || !data.email || !data.password) {
-                 // Simulate error response
-                reject({ response: { data: { message: "Registration failed: Please check inputs or try a different username. (Mock Error)" } } });
-            } else if (url === "/auth/register") {
-                // Simulate successful registration response
-                console.log("MOCK API: Registration successful for", data.username);
-                resolve({ data: { message: "User created successfully." } });
-            } else {
-                reject({ response: { data: { message: "Mock API endpoint not found." } } });
-            }
-        }, 800);
-    }),
-};
-
-// MOCK 2: useNavigate - Simulates navigation without actual routing in this environment
-const useNavigate = () => (path) => console.log("NAVIGATING TO:", path);
-// --- END: MOCK DEPENDENCIES ---
-
-
-// --- START: SVG Icon Definitions ---
+// --- START: SVG Icon Definitions (Only Used Icons) ---
 const User = (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>;
-const Key = (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10 20A8 8 0 0 0 20 10V4h-6L6 14l2 4 4-2Z"/><circle cx="14" cy="14" r="2"/><circle cx="17.5" cy="6.5" r=".5"/></svg>;
+const Key = (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m10 14 4-4"/><path d="M18 10a1.5 1.5 0 0 0-3 0m3 0 1.5-1.5L21 7l-1.5 1.5"/><path d="m14 6-4-4-4 4 4 4"/><path d="M12 22s-8-4-8-10 8-10 8-10 8 4 8 10-8 10-8 10Z"/></svg>; // Updated Key Icon (Simpler)
 const Mail = (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>;
 const CheckCircle = (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>;
-const ArrowRight = (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14m-7-7 7 7-7 7"/></svg>;
-const Loader = (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v4m3 12-2-2m-6 0-2 2m0-6H4m12 3 2 2m0-6 2-2M7 7 5 5m12 0 2 2M12 18v4m-3-3 2-2m6 0L15 6m-3-3L12 6M6 9H4"/></svg>;
-const Sparkles = (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3v3m-3 3 1.5 1.5m6 0L15 6m3 3-1.5 1.5M6 18h12m-3-3 1.5-1.5m-6 0L9 15m0 3 1.5-1.5m6 0-1.5-1.5M12 21v-3"/></svg>;
-const Shield = (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>;
-const Home = (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>;
+const ArrowRight = (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>; // Updated Arrow Icon
+const Loader = (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>; // Updated Loader Icon (Spinner)
 const FaEye = ({ size = 20, className = "" }) => <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>;
-const FaEyeSlash = ({ size = 20, className = "" }) => <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7"/><path d="M6.28 17.72 2 22m15.46-3.82L22 22m-7.22-7.22-4.54-4.54"/><circle cx="12" cy="12" r="3"/><path d="M1.3 1.3 22.7 22.7"/></svg>;
-const Verified = (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>;
-const Fingerprint = (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12C2 6.48 6.48 2 12 2s10 4.48 10 10-4.48 10-10 10S2 17.52 2 12Z"/><path d="M12 2v6"/><path d="M16 4.2C18.66 5.5 20.35 8 20.35 12"/><path d="M12 8a4 4 0 0 1 0 8"/><path d="M7.7 7.7 6.66 9.34"/><path d="M16 19.8c-2.66 1.3-5.34 1.3-8 0"/></svg>;
-const Globe = (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>;
+const FaEyeSlash = ({ size = 20, className = "" }) => <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" x2="22" y1="2" y2="22"/></svg>; // Updated EyeSlash Icon
+// Removed: Sparkles, Shield, Home, Verified, Fingerprint, Globe
 // --- END: SVG Icon Definitions ---
 
 function RegisterContent() {
-    // Original State and Context Logic
     const [error, setError] = useState("");
     const [isLoading, setIsLoading] = useState(false);
-    const [password, setPassword] = useState(""); // State to track password input for strength meter
-    const navigate = useNavigate();
+    const [password, setPassword] = useState("");
+    const navigate = useNavigate(); // Using actual hook
 
-    // New State for UI enhancement
     const [showPassword, setShowPassword] = useState(false);
     const [usernameFocused, setUsernameFocused] = useState(false);
     const [emailFocused, setEmailFocused] = useState(false);
     const [passwordFocused, setPasswordFocused] = useState(false);
 
-    // Helper function for input focus style
-    const getStyle = (isFocused) => {
-        const baseColor = "#9CA3AF";
-        const focusedColor = "#3B82F6";
-        return {
-            color: isFocused ? focusedColor : baseColor,
-            transition: 'color 0.3s'
-        };
-    };
+    const getStyle = (isFocused) => ({
+        color: isFocused ? "#3B82F6" : "#9CA3AF",
+        transition: 'color 0.3s'
+    });
 
-    // Password Strength Meter Logic
     const getPasswordStrength = (p) => {
         let strength = 0;
-        const lengthWeight = p.length / 10; // Max 1 for length > 10
-        const hasUpper = /[A-Z]/.test(p);
-        const hasLower = /[a-z]/.test(p);
-        const hasNumber = /\d/.test(p);
-        const hasSpecial = /[^A-Za-z0-9]/.test(p);
-
         if (p.length > 0) strength += 1;
         if (p.length >= 8) strength += 1;
-        if (hasUpper || hasLower) strength += 1;
-        if (hasNumber) strength += 1;
-        if (hasSpecial) strength += 1;
-        
+        if (/[A-Z]/.test(p) || /[a-z]/.test(p)) strength += 1;
+        if (/\d/.test(p)) strength += 1;
+        if (/[^A-Za-z0-9]/.test(p)) strength += 1;
+
         const score = Math.min(5, strength);
         const percentage = (score / 5) * 100;
 
         let label, color;
-        if (score <= 1) { label = "Too Short"; color = "#ef4444"; } // Red
-        else if (score <= 3) { label = "Medium"; color = "#f97316"; } // Orange
-        else { label = "Strong"; color = "#10b981"; } // Green
+        if (score <= 1) { label = "Too Short"; color = "#ef4444"; }
+        else if (score <= 3) { label = "Medium"; color = "#f97316"; }
+        else { label = "Strong"; color = "#10b981"; }
 
         return { percentage, label, color };
     };
     const strength = getPasswordStrength(password);
 
-
-    // Original handleSubmit Logic (Kept intact, uses mock apiRequest)
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setError("")
+        setError("");
         setIsLoading(true);
         const formData = new FormData(e.target);
 
         const username = formData.get("username");
         const email = formData.get("email");
-        const password = formData.get("password");
+        const passwordValue = formData.get("password"); // Renamed variable
+
+        // Basic frontend validation
+        if (!username || !email || !passwordValue) {
+            setError("All fields are required.");
+            setIsLoading(false);
+            return;
+        }
+        if (passwordValue.length < 6) { // Example: Minimum password length
+             setError("Password must be at least 6 characters long.");
+             setIsLoading(false);
+             return;
+        }
 
         try {
-            // Your original apiRequest call is preserved
+            // Using actual apiRequest
             const res = await apiRequest.post("/auth/register", {
                 username,
                 email,
-                password,
+                password: passwordValue, // Use renamed variable
             });
 
-            // Your original navigation logic is preserved
-            navigate("/login");
+            console.log("Registration successful:", res.data); // Log success
+            navigate("/login"); // Navigate using actual hook
+
         } catch (err) {
             console.error("Registration Error:", err);
-            setError(err.response?.data?.message || "Registration failed. Check console for details.");
+            // Extract error message reliably
+            const message = err.response?.data?.message || err.message || "Registration failed. Please try again.";
+            setError(message);
         } finally {
             setIsLoading(false);
         }
@@ -127,624 +96,245 @@ function RegisterContent() {
 
     return (
         <div className="login-page">
-            {/* START: Pure CSS/SCSS Output Block from the Login component */}
+            {/* Inline Styles */}
             <style>
                 {`
-                /* CSS Reset and Base Styles */
-                .login-page * {
-                    box-sizing: border-box;
-                    font-family: 'Inter', sans-serif;
-                }
-                .login-page {
-                    min-height: 100vh;
-                    position: relative;
-                    overflow: hidden;
-                    background-color: #f7f9fc; /* Light background */
-                }
+                /* Basic Reset */
+                .login-page * { box-sizing: border-box; font-family: 'Inter', sans-serif; }
+                .login-page { min-height: 100vh; position: relative; overflow: hidden; background-color: #f7f9fc; }
+
+                /* Text Colors */
                 .text-blue-500 { color: #3b82f6; }
                 .text-green-500 { color: #10b981; }
-                .text-purple-500 { color: #9333ea; }
+                .text-purple-500 { color: #8b5cf6; } /* Adjusted purple */
                 .text-gray-700 { color: #374151; }
                 .text-gray-600 { color: #4b5563; }
                 .text-gray-800 { color: #1f2937; }
                 .text-gray-500 { color: #6b7280; }
-                .text-error { 
-                    color: #ef4444; 
-                    margin-top: 0.75rem; 
-                    text-align: center; 
-                    font-weight: 500;
-                    background-color: #fee2e2;
-                    padding: 0.5rem;
-                    border-radius: 0.5rem;
-                    border: 1px solid #f87171;
-                }
+                .text-error { color: #ef4444; margin-top: 0.75rem; text-align: center; font-weight: 500; background-color: #fee2e2; padding: 0.5rem; border-radius: 0.5rem; border: 1px solid #f87171; font-size: 0.875rem;}
 
-                /* --- Background and Animated Elements (Shared) --- */
-                .bg-main {
-                    position: absolute;
-                    inset: 0;
-                    background: linear-gradient(to bottom right, #eff6ff, #eef2ff, #f5f3ff);
-                }
-                .bg-main::before, .bg-main::after, .bg-blob {
-                    content: '';
-                    position: absolute;
-                    inset: 0;
-                }
-                .bg-main::before {
-                    background: linear-gradient(to top right, rgba(219, 234, 254, 0.3), transparent, rgba(237, 233, 254, 0.3));
-                }
-                .bg-main::after {
-                    background: linear-gradient(to bottom left, transparent, rgba(224, 231, 255, 0.2), transparent);
-                }
+                /* Background Gradient & Blobs */
+                .bg-main { position: absolute; inset: 0; background: linear-gradient(to bottom right, #eff6ff, #eef2ff, #f5f3ff); }
+                .bg-main::before, .bg-main::after { content: ''; position: absolute; inset: 0; }
+                .bg-main::before { background: linear-gradient(to top right, rgba(219, 234, 254, 0.3), transparent, rgba(237, 233, 254, 0.3)); }
+                .bg-main::after { background: linear-gradient(to bottom left, transparent, rgba(224, 231, 255, 0.2), transparent); }
+                @keyframes floating { 0%, 100% { transform: translateY(-3px) scale(1); } 50% { transform: translateY(3px) scale(1.03); } }
+                .floating-blob { position: absolute; border-radius: 9999px; filter: blur(40px); opacity: 0.4; animation: floating 6s infinite ease-in-out alternate; }
+                .blob-1 { top: 5rem; left: 5rem; width: 8rem; height: 8rem; background: rgba(96, 165, 250, 0.2); animation-delay: 0s; }
+                .blob-2 { bottom: 8rem; right: 8rem; width: 10rem; height: 10rem; background: rgba(168, 85, 247, 0.2); animation-delay: -2s; }
+                .blob-3 { top: 40%; right: 5rem; width: 6rem; height: 6rem; background: rgba(74, 222, 128, 0.2); animation-delay: -4s; }
 
-                /* Floating Blobs */
-                @keyframes floating {
-                    0%, 100% { transform: translateY(-3px); }
-                    50% { transform: translateY(3px); }
-                }
-                .floating-blob {
-                    position: absolute;
-                    border-radius: 9999px;
-                    filter: blur(40px);
-                    opacity: 0.5;
-                    animation: floating 4s infinite ease-in-out;
-                }
-                .blob-1 {
-                    top: 5rem;
-                    left: 5rem;
-                    width: 8rem;
-                    height: 8rem;
-                    background: linear-gradient(to bottom right, rgba(96, 165, 250, 0.2), rgba(99, 102, 241, 0.2));
-                    animation-delay: 0s;
-                }
-                .blob-2 {
-                    bottom: 8rem;
-                    right: 8rem;
-                    width: 10rem;
-                    height: 10rem;
-                    background: linear-gradient(to bottom right, rgba(168, 85, 247, 0.2), rgba(236, 72, 153, 0.2));
-                    animation-delay: 1s;
-                }
-                .blob-3 {
-                    top: 50%;
-                    left: 2.5rem;
-                    width: 6rem;
-                    height: 6rem;
-                    background: linear-gradient(to bottom right, rgba(74, 222, 128, 0.2), rgba(59, 130, 246, 0.2));
-                    animation-delay: 2s;
-                }
-                
-                /* --- Login Wrapper and Card (Shared) --- */
-                .login-wrapper {
-                    position: relative;
-                    z-index: 10;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    min-height: 100vh;
-                    padding: 5rem 1rem;
-                }
-                .login-card-container {
-                    width: 100%;
-                    max-width: 28rem;
-                }
-                .login-card {
-                    position: relative;
-                    background-color: rgba(255, 255, 255, 0.9);
-                    backdrop-filter: blur(12px);
-                    border-radius: 1.5rem;
-                    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-                    border: 1px solid rgba(255, 255, 255, 0.4);
-                    overflow: hidden;
-                    padding: 3rem 2rem 2rem;
-                }
-                .card-deco-top {
-                    position: absolute;
-                    top: -1rem;
-                    right: -1rem;
-                    width: 6rem;
-                    height: 6rem;
-                    background: linear-gradient(to bottom right, rgba(59, 130, 246, 0.2), rgba(79, 70, 229, 0.2));
-                    border-radius: 9999px;
-                    filter: blur(20px);
-                }
-                .card-deco-bottom {
-                    position: absolute;
-                    bottom: -1rem;
-                    left: -1rem;
-                    width: 8rem;
-                    height: 8rem;
-                    background: linear-gradient(to bottom right, rgba(147, 51, 234, 0.2), rgba(236, 72, 153, 0.2));
-                    border-radius: 9999px;
-                    filter: blur(20px);
-                }
-                .header-section {
-                    text-align: center;
-                    margin-bottom: 2.5rem;
-                }
-                .logo-link {
-                    display: inline-block;
-                    transition: transform 0.2s;
-                }
-                .logo-group {
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    gap: 0.75rem;
-                    margin-bottom: 1.5rem;
-                }
-                @keyframes pulse {
-                    0%, 100% { transform: scale(1); }
-                    50% { transform: scale(1.05); }
-                }
-                .logo-icon-wrapper {
-                    padding: 0.75rem;
-                    background: linear-gradient(to bottom right, #2563eb, #4f46e5);
-                    border-radius: 0.75rem;
-                    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-                    animation: pulse 2s infinite ease-in-out;
-                }
-                .logo-title {
-                    font-size: 1.875rem;
-                    font-weight: 700;
-                    background-image: linear-gradient(to right, #2563eb, #4f46e5, #9333ea);
-                    -webkit-background-clip: text;
-                    color: transparent;
-                    background-clip: text;
-                }
-                @keyframes sparkle {
-                    0%, 100% { transform: scale(1) rotate(0deg); }
-                    50% { transform: scale(1.2) rotate(180deg); }
-                }
-                .sparkle-icon {
-                    animation: sparkle 3s infinite ease-in-out;
-                    color: #facc15;
-                }
+                /* Login Wrapper & Card */
+                .login-wrapper { position: relative; z-index: 10; display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 4rem 1rem; }
+                .login-card-container { width: 100%; max-width: 28rem; }
+                .login-card { position: relative; background-color: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border-radius: 1.5rem; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1); border: 1px solid rgba(255, 255, 255, 0.6); overflow: hidden; padding: 2.5rem 2rem; }
 
-                /* --- Form and Input Styles (Shared) --- */
-                .login-form {
-                    display: flex;
-                    flex-direction: column;
-                    gap: 1.5rem;
-                }
-                .input-group {
-                    display: flex;
-                    flex-direction: column;
-                    gap: 0.5rem;
-                }
-                .input-label {
-                    display: flex;
-                    align-items: center;
-                    gap: 0.5rem;
-                    font-size: 0.875rem;
-                    font-weight: 600;
-                }
-                .input-field-wrapper {
-                    position: relative;
-                }
-                .input-field {
-                    width: 100%;
-                    padding: 1rem 1rem 1rem 3rem;
-                    padding-right: 3rem; 
-                    border-radius: 0.75rem;
-                    background-color: rgba(249, 250, 251, 0.8);
-                    backdrop-filter: blur(2px);
-                    border: 1px solid #e5e7eb;
-                    transition: all 0.3s;
-                    color: #1f2937;
-                    outline: none;
-                }
-                .input-field::placeholder {
-                    color: #9ca3af;
-                }
-                .input-field:focus {
-                    border-color: #3b82f6;
-                    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
-                }
-                .input-icon {
-                    position: absolute;
-                    left: 1rem;
-                    top: 50%;
-                    transform: translateY(-50%);
-                    color: #9ca3af;
-                }
+                /* Card Decorations */
+                .card-deco-top, .card-deco-bottom { position: absolute; border-radius: 9999px; filter: blur(20px); z-index: -1; }
+                .card-deco-top { top: -1.5rem; right: -1.5rem; width: 6rem; height: 6rem; background: rgba(59, 130, 246, 0.15); }
+                .card-deco-bottom { bottom: -1.5rem; left: -1.5rem; width: 8rem; height: 8rem; background: rgba(147, 51, 234, 0.15); }
 
-                /* Show/Hide Password Button */
-                .toggle-password-btn {
-                    position: absolute;
-                    right: 1rem;
-                    top: 50%;
-                    transform: translateY(-50%);
-                    color: #9ca3af;
-                    padding: 0.25rem;
-                    border-radius: 0.5rem;
-                    transition: color 0.3s, background-color 0.3s;
-                    cursor: pointer;
-                    background: none;
-                    border: none;
-                }
-                .toggle-password-btn:hover {
-                    color: #4b5563;
-                    background-color: #f3f4f6;
-                }
+                /* Header Section */
+                .header-section { text-align: center; margin-bottom: 2rem; }
+                .logo-link { display: inline-block; transition: transform 0.2s; }
+                .logo-link:hover { transform: scale(1.05); }
+                .logo-group { display: flex; align-items: center; justify-content: center; gap: 0.75rem; margin-bottom: 1rem; }
+                .logo-icon-wrapper { padding: 0.75rem; background: linear-gradient(to bottom right, #3b82f6, #6366f1); border-radius: 0.75rem; box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.2), 0 4px 6px -4px rgba(59, 130, 246, 0.1); display: inline-flex; }
+                .logo-icon-wrapper svg { width: 1.5rem; height: 1.5rem; color: white; } /* Ensure Home icon is sized */
+                .logo-title { font-size: 1.75rem; font-weight: 700; color: #374151; }
+                .header-text h2 { font-size: 1.5rem; font-weight: bold; color: #1f2937; margin-bottom: 0.5rem; }
+                .header-text p { color: #4b5563; display: flex; align-items: center; justify-content: center; gap: 0.5rem; font-size: 0.9rem;}
+                .header-text svg { width: 1rem; height: 1rem; } /* Size for Shield icon */
 
-                /* Password Strength Meter */
-                .strength-meter-container {
-                    margin-top: -0.5rem;
-                    margin-bottom: 0.5rem;
-                }
-                .strength-bar {
-                    height: 8px;
-                    border-radius: 9999px;
-                    transition: width 0.4s ease-in-out, background-color 0.4s;
-                }
-                .strength-label {
-                    font-size: 0.75rem;
-                    font-weight: 600;
-                    margin-top: 0.25rem;
-                }
-                
-                /* --- Submit Button (Shared but with different text/icon) --- */
-                .btn-submit {
-                    width: 100%;
-                    background: linear-gradient(to right, #2563eb, #4f46e5, #9333ea);
-                    color: white;
-                    padding: 1rem;
-                    border-radius: 0.75rem;
-                    transition: all 0.3s;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    gap: 0.75rem;
-                    font-weight: 600;
-                    box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.25);
-                    position: relative;
-                    overflow: hidden;
-                    border: none;
-                    cursor: pointer;
-                }
-                .btn-submit:disabled {
-                    opacity: 0.7;
-                    box-shadow: none;
-                    cursor: not-allowed;
-                }
-                .btn-submit:hover:not(:disabled)::before {
-                    opacity: 1;
-                }
-                .btn-submit::before {
-                    content: '';
-                    position: absolute;
-                    inset: 0;
-                    background: linear-gradient(to right, rgba(255, 255, 255, 0.2), transparent);
-                    opacity: 0;
-                    transition: opacity 0.3s;
-                }
-                .btn-submit:hover .icon-arrow {
-                    transform: translateX(0.25rem);
-                }
-                .icon-arrow {
-                    transition: transform 0.3s;
-                }
-                @keyframes spin {
-                    from { transform: rotate(0deg); }
-                    to { transform: rotate(360deg); }
-                }
-                .loader-icon {
-                    animation: spin 1s linear infinite;
-                }
+                /* Form & Inputs */
+                .login-form { display: flex; flex-direction: column; gap: 1.25rem; }
+                .input-group { display: flex; flex-direction: column; gap: 0.5rem; }
+                .input-label { display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem; font-weight: 600; color: #374151; }
+                .input-label svg { width: 1rem; height: 1rem; } /* Size icons in label */
+                .input-field-wrapper { position: relative; }
+                .input-field { width: 100%; padding: 0.9rem 1rem 0.9rem 2.75rem; padding-right: 2.75rem; border-radius: 0.75rem; background-color: rgba(249, 250, 251, 0.9); border: 1px solid #e5e7eb; transition: all 0.3s; color: #1f2937; outline: none; font-size: 0.9rem; }
+                .input-field::placeholder { color: #9ca3af; }
+                .input-field:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15); background-color: white; }
+                .input-icon { position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: #9ca3af; pointer-events: none; }
+                .input-icon svg { width: 1.25rem; height: 1.25rem; } /* Size icons in input */
 
-                /* --- Divider and Sign Up Link (Shared) --- */
-                .divider {
-                    position: relative;
-                    margin: 2rem 0;
-                }
-                .divider::before {
-                    content: '';
-                    position: absolute;
-                    top: 50%;
-                    left: 0;
-                    right: 0;
-                    height: 1px;
-                    background-color: #d1d5db;
-                    z-index: 1;
-                }
-                .divider-text {
-                    position: relative;
-                    display: flex;
-                    justify-content: center;
-                    font-size: 0.875rem;
-                    z-index: 2;
-                }
-                .divider-text span {
-                    padding: 0 1rem;
-                    background-color: rgba(255, 255, 255, 0.8);
-                    color: #6b7280;
-                    font-weight: 500;
-                    /* Match card background for seamless look */
-                    background-color: rgba(255, 255, 255, 0.9);
-                }
-                
-                .btn-signup {
-                    width: 100%;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    gap: 0.75rem;
-                    padding: 1rem 1.5rem;
-                    border: 1px solid #e5e7eb;
-                    border-radius: 0.75rem;
-                    color: #374151;
-                    transition: all 0.3s;
-                    font-weight: 500;
-                    text-decoration: none;
-                }
-                .btn-signup:hover {
-                    background: linear-gradient(to right, #f9fafb, #eff6ff);
-                    border-color: #bfdbfe;
-                }
-                .btn-signup:hover .icon-user {
-                    color: #2563eb;
-                }
-                .btn-signup:hover .icon-arrow {
-                    transform: translateX(0.25rem);
-                }
-                /* Mobile optimization for smaller screens */
+                /* Show/Hide Password */
+                .toggle-password-btn { position: absolute; right: 0.75rem; top: 50%; transform: translateY(-50%); color: #9ca3af; padding: 0.35rem; border-radius: 0.5rem; transition: color 0.3s, background-color 0.3s; cursor: pointer; background: none; border: none; display: flex; align-items: center; justify-content: center;}
+                .toggle-password-btn:hover { color: #4b5563; background-color: #f3f4f6; }
+
+                /* Password Strength */
+                .strength-meter-container { margin-top: -0.25rem; margin-bottom: 0.75rem; }
+                .strength-bar-bg { background-color: #e5e7eb; width: 100%; height: 6px; border-radius: 9999px; overflow: hidden;}
+                .strength-bar { height: 100%; border-radius: 9999px; transition: width 0.4s ease-in-out, background-color 0.4s; }
+                .strength-label { font-size: 0.75rem; font-weight: 500; margin-top: 0.25rem; color: #4b5563; }
+                .strength-label span { font-weight: 600; }
+
+                /* Submit Button */
+                .btn-submit { width: 100%; background: linear-gradient(to right, #3b82f6, #6366f1); color: white; padding: 0.9rem 1rem; border-radius: 0.75rem; transition: all 0.3s; display: flex; align-items: center; justify-content: center; gap: 0.75rem; font-weight: 600; font-size: 0.95rem; box-shadow: 0 8px 15px -3px rgba(59, 130, 246, 0.3); border: none; cursor: pointer; position: relative; overflow: hidden;}
+                .btn-submit:disabled { opacity: 0.6; box-shadow: none; cursor: not-allowed; }
+                .btn-submit:hover:not(:disabled) { box-shadow: 0 12px 20px -3px rgba(59, 130, 246, 0.35); transform: translateY(-2px); }
+                .btn-submit svg { width: 1.25rem; height: 1.25rem; }
+                .btn-submit .icon-arrow { transition: transform 0.3s; }
+                .btn-submit:hover:not(:disabled) .icon-arrow { transform: translateX(0.25rem); }
+                @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+                .loader-icon { animation: spin 1s linear infinite; }
+
+                /* Divider & Alt Link */
+                .divider { position: relative; margin: 1.75rem 0; }
+                .divider::before { content: ''; position: absolute; top: 50%; left: 0; right: 0; height: 1px; background-color: #d1d5db; z-index: 1; }
+                .divider-text { position: relative; display: flex; justify-content: center; z-index: 2; }
+                .divider-text span { padding: 0 0.75rem; background-color: rgba(255, 255, 255, 0.95); color: #6b7280; font-size: 0.8rem; font-weight: 500; backdrop-filter: blur(10px);}
+                .btn-alt-link { width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.75rem; padding: 0.9rem 1rem; border: 1px solid #e5e7eb; border-radius: 0.75rem; color: #374151; transition: all 0.3s; font-weight: 500; text-decoration: none; background-color: rgba(255, 255, 255, 0.8); font-size: 0.9rem;}
+                .btn-alt-link:hover { background-color: #f9fafb; border-color: #d1d5db; }
+                .btn-alt-link svg { width: 1.1rem; height: 1.1rem; color: #6b7280; transition: color 0.3s;}
+                .btn-alt-link:hover svg.icon-user { color: #3b82f6; }
+                .btn-alt-link .icon-arrow { transition: transform 0.3s; }
+                .btn-alt-link:hover .icon-arrow { transform: translateX(0.25rem); }
+
+                /* Responsive */
                 @media (max-width: 640px) {
-                    .login-card {
-                        padding: 2rem 1rem 1.5rem;
-                        border-radius: 1rem;
-                    }
-                    .header-section {
-                        margin-bottom: 2rem;
-                    }
-                }
-
-                /* Feature Badge Styles */
-                .feature-badge {
-                    display: flex;
-                    flex-direction: column;
-                    align-items: center;
-                    gap: 0.5rem;
-                    text-align: center;
-                    padding: 0.5rem;
-                }
-                .feature-icon-wrapper {
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    width: 3rem;
-                    height: 3rem;
-                    border-radius: 50%;
-                    background: rgba(255, 255, 255, 0.5);
-                    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-                }
-                .feature-badge-text {
-                    font-size: 0.75rem;
-                    font-weight: 600;
-                    color: #4b5563;
+                    .login-card { padding: 2rem 1.25rem; }
+                    .header-section { margin-bottom: 1.5rem; }
+                    .login-form { gap: 1rem; }
+                    .btn-submit, .btn-alt-link { padding: 0.8rem 1rem; font-size: 0.9rem;}
+                    .input-field { padding: 0.8rem 1rem 0.8rem 2.5rem; padding-right: 2.5rem;}
+                    .input-icon svg, .toggle-password-btn svg { width: 1.1rem; height: 1.1rem;}
                 }
                 `}
             </style>
-            {/* END: Pure CSS/SCSS Output Block */}
 
-            {/* Enhanced Background with Animated Blobs */}
+            {/* Background */}
             <div className="bg-main">
                 <div className="floating-blob blob-1" />
                 <div className="floating-blob blob-2" />
                 <div className="floating-blob blob-3" />
             </div>
 
+            {/* Content */}
             <div className="login-wrapper">
                 <div className="login-card-container">
                     <div className="login-card">
-                        {/* Decorative Elements */}
                         <div className="card-deco-top"></div>
                         <div className="card-deco-bottom"></div>
 
-                        <div className="relative">
-                            {/* Logo & Title Section */}
+                        <div style={{position: 'relative', zIndex: 1}}> {/* Content Wrapper */}
+                            {/* Header */}
                             <div className="header-section">
                                 <Link to="/" className="logo-link">
                                     <div className="logo-group">
                                         <div className="logo-icon-wrapper">
-                                            <Home className="w-6 h-6 text-white" />
+                                            {/* Assuming you have a Home icon */}
+                                            {/* If not using react-icons, replace with <img> or SVG */}
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M11.47 3.84a.75.75 0 0 1 1.06 0l8.69 8.69a.75.75 0 1 0 1.06-1.06l-8.68-8.69a2.25 2.25 0 0 0-3.182 0l-8.69 8.69a.75.75 0 1 0 1.061 1.06l8.69-8.69Z"/><path d="m12 5.432 8.159 8.159c.03.03.06.058.091.086v6.198c0 1.035-.84 1.875-1.875 1.875H15a.75.75 0 0 1-.75-.75v-4.5a.75.75 0 0 0-.75-.75h-3a.75.75 0 0 0-.75.75V21a.75.75 0 0 1-.75.75H5.625a1.875 1.875 0 0 1-1.875-1.875v-6.198a2.29 2.29 0 0 0 .091-.086L12 5.43Z"/></svg>
                                         </div>
-                                        <h1 className="logo-title">
-                                            BuildEstate
-                                        </h1>
-                                        <div className="sparkle-icon">
-                                            <Sparkles className="w-5 h-5" />
-                                        </div>
+                                        <h1 className="logo-title">PropertyHuntt</h1>
                                     </div>
                                 </Link>
-
-                                <div >
-                                    <h2 className="text-2xl font-bold text-gray-800 mb-2">Join the Community!</h2>
-                                    <p className="text-gray-600 flex items-center justify-center gap-2">
-                                        <Shield className="w-4 h-4 text-blue-500" />
+                                <div className="header-text">
+                                    <h2>Join the Community!</h2>
+                                    <p>
+                                        {/* Assuming Shield icon */}
+                                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="text-blue-500"><path fillRule="evenodd" d="M12.963 2.286a.75.75 0 0 0-1.071-.136 9.742 9.742 0 0 0-3.539 6.177A7.547 7.547 0 0 1 6.648 6.61a.75.75 0 0 0-1.152-.082A9 9 0 1 0 15.68 4.534a7.46 7.46 0 0 1-2.717-2.248ZM15.75 14.25a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z" clipRule="evenodd" /></svg>
                                         Create your secure account
                                     </p>
                                 </div>
                             </div>
 
-                            {/* Enhanced Form - Uses original handleSubmit logic */}
-                            <form
-                                onSubmit={handleSubmit}
-                                className="login-form"
-                            >
-                                {/* Username Field */}
+                            {/* Form */}
+                            <form onSubmit={handleSubmit} className="login-form" noValidate>
+                                {/* Username */}
                                 <div className="input-group">
-                                    <label htmlFor="username" className="input-label text-gray-700">
-                                        <User className="w-4 h-4 text-blue-500" />
-                                        Username
+                                    <label htmlFor="username" className="input-label">
+                                        <User style={getStyle(usernameFocused)} /> Username
                                     </label>
                                     <div className="input-field-wrapper">
                                         <input
-                                            type="text"
-                                            name="username" 
-                                            id="username"
-                                            required
-                                            minLength={3}
-                                            maxLength={20}
+                                            type="text" name="username" id="username" required
+                                            minLength={3} maxLength={20}
                                             onFocus={() => setUsernameFocused(true)}
                                             onBlur={() => setUsernameFocused(false)}
-                                            className="input-field"
-                                            placeholder="Enter unique username (try 'fail' to fail)"
+                                            className="input-field" placeholder="Choose a username"
+                                            aria-describedby="username-error"
                                         />
-                                        <div
-                                            className="input-icon"
-                                            style={getStyle(usernameFocused)}
-                                        >
-                                            <User className="w-5 h-5" />
-                                        </div>
+                                        <div className="input-icon"><User style={getStyle(usernameFocused)}/></div>
                                     </div>
+                                    {/* Add aria-live region for potential username errors */}
+                                     <div id="username-error" aria-live="polite" style={{ height: '1rem' }}></div>
                                 </div>
 
-                                {/* Email Field */}
+                                {/* Email */}
                                 <div className="input-group">
-                                    <label htmlFor="email" className="input-label text-gray-700">
-                                        <Mail className="w-4 h-4 text-blue-500" />
-                                        Email
+                                    <label htmlFor="email" className="input-label">
+                                        <Mail style={getStyle(emailFocused)} /> Email
                                     </label>
                                     <div className="input-field-wrapper">
                                         <input
-                                            type="email"
-                                            name="email"
-                                            id="email"
-                                            required
+                                            type="email" name="email" id="email" required
                                             onFocus={() => setEmailFocused(true)}
                                             onBlur={() => setEmailFocused(false)}
-                                            className="input-field"
-                                            placeholder="Enter your email"
+                                            className="input-field" placeholder="your@email.com"
+                                            aria-describedby="email-error"
                                         />
-                                        <div
-                                            className="input-icon"
-                                            style={getStyle(emailFocused)}
-                                        >
-                                            <Mail className="w-5 h-5" />
-                                        </div>
+                                        <div className="input-icon"><Mail style={getStyle(emailFocused)}/></div>
                                     </div>
+                                     <div id="email-error" aria-live="polite" style={{ height: '1rem' }}></div>
                                 </div>
 
-
-                                {/* Password Field */}
+                                {/* Password */}
                                 <div className="input-group">
-                                    <label htmlFor="password" className="input-label text-gray-700">
-                                        <Key className="w-4 h-4 text-blue-500" />
-                                        Password
+                                    <label htmlFor="password" className="input-label">
+                                        <Key style={getStyle(passwordFocused)} /> Password
                                     </label>
                                     <div className="input-field-wrapper">
                                         <input
                                             type={showPassword ? "text" : "password"}
-                                            name="password"
-                                            id="password"
-                                            required
-                                            value={password}
-                                            onChange={(e) => setPassword(e.target.value)}
+                                            name="password" id="password" required
+                                            value={password} onChange={(e) => setPassword(e.target.value)}
                                             onFocus={() => setPasswordFocused(true)}
                                             onBlur={() => setPasswordFocused(false)}
-                                            className="input-field"
-                                            placeholder="••••••••"
+                                            className="input-field" placeholder="••••••••"
+                                            aria-describedby="password-strength password-error"
                                         />
-                                        <div
-                                            className="input-icon"
-                                            style={getStyle(passwordFocused)}
-                                        >
-                                            <Key className="w-5 h-5" />
-                                        </div>
-                                        {/* Toggle Password Button */}
-                                        <button
-                                            type="button"
-                                            onClick={() => setShowPassword(!showPassword)}
-                                            className="toggle-password-btn"
-                                        >
-                                            {showPassword ? <FaEyeSlash size={18} /> : <FaEye size={18} />}
+                                        <div className="input-icon"><Key style={getStyle(passwordFocused)}/></div>
+                                        <button type="button" onClick={() => setShowPassword(!showPassword)} className="toggle-password-btn" aria-label={showPassword ? "Hide password" : "Show password"}>
+                                            {showPassword ? <FaEyeSlash /> : <FaEye />}
                                         </button>
                                     </div>
-
-                                    {/* Password Strength Meter */}
+                                     {/* Password Strength Meter */}
                                     {password.length > 0 && (
-                                        <div className="strength-meter-container">
-                                            <p className="strength-label text-gray-600">
+                                        <div className="strength-meter-container" id="password-strength">
+                                             <p className="strength-label">
                                                 Password strength: <span style={{ color: strength.color }}>{strength.label}</span>
-                                            </p>
-                                            <div style={{ backgroundColor: '#e5e7eb' }} className="w-full rounded-full">
-                                                <div 
-                                                    className="strength-bar" 
-                                                    style={{ 
-                                                        width: `${strength.percentage}%`, 
-                                                        backgroundColor: strength.color 
-                                                    }}
-                                                />
-                                            </div>
-                                        </div>
+                                             </p>
+                                             <div className="strength-bar-bg">
+                                                 <div className="strength-bar" style={{ width: `${strength.percentage}%`, backgroundColor: strength.color }}/>
+                                             </div>
+                                         </div>
                                     )}
+                                     <div id="password-error" aria-live="polite" style={{ height: '1rem' }}></div>
                                 </div>
-                                
-                                {/* Enhanced Submit Button */}
-                                <button
-                                    type="submit"
-                                    disabled={isLoading}
-                                    className="btn-submit group"
-                                >
+
+                                {/* Submit Button */}
+                                <button type="submit" disabled={isLoading} className="btn-submit">
                                     {isLoading ? (
-                                        <>
-                                            <Loader className="w-5 h-5 loader-icon" />
-                                            <span>Creating Account...</span>
-                                        </>
+                                        <> <Loader className="loader-icon" /> <span>Creating Account...</span> </>
                                     ) : (
-                                        <>
-                                            <CheckCircle className="w-5 h-5" />
-                                            <span>Create Account</span>
-                                            <ArrowRight className="w-5 h-5 icon-arrow" />
-                                        </>
+                                        <> <CheckCircle /> <span>Create Account</span> <ArrowRight className="icon-arrow" /> </>
                                     )}
                                 </button>
-                                
+
                                 {/* Error Display */}
-                                {error && <span className="text-error">{error}</span>}
+                                {error && <p className="text-error" role="alert">{error}</p>}
 
-                                {/* Feature Badges Row */}
-                                <div className="flex flex-directionjustify-between mt-4 mb-4">
-                                    <div className="feature-badge">
-                                        <div className="feature-icon-wrapper border-blue-200">
-                                            <Fingerprint className="w-6 h-6 text-blue-500" />
-                                        </div>
-                                        <span className="feature-badge-text">Secure</span>
-                                    </div>
-                                    <div className="feature-badge">
-                                        <div className="feature-icon-wrapper border-green-200">
-                                            <Verified className="w-6 h-6 text-green-500" />
-                                        </div>
-                                        <span className="feature-badge-text">Verified</span>
-                                    </div>
-                                    <div className="feature-badge">
-                                        <div className="feature-icon-wrapper border-purple-200">
-                                            <Globe className="w-6 h-6 text-purple-500" />
-                                        </div>
-                                        <span className="feature-badge-text">Premium</span>
-                                    </div>
-                                </div>
-
-
-                                {/* Divider and Login Link */}
+                                {/* Divider */}
                                 <div className="divider">
-                                    <div className="divider-text">
-                                        <span>
-                                            Already have an account?
-                                        </span>
-                                    </div>
+                                    <div className="divider-text"><span>Already joined?</span></div>
                                 </div>
 
-                                {/* Enhanced Login Link */}
+                                {/* Login Link */}
                                 <div>
-                                    <Link
-                                        to="/login"
-                                        className="btn-signup group" // Reusing the login button style
-                                    >
-                                        <User className="w-5 h-5 text-gray-500 icon-user" />
-                                        Sign in to your account
-                                        <ArrowRight className="w-4 h-4 icon-arrow" />
+                                    <Link to="/login" className="btn-alt-link">
+                                        <User className="icon-user" /> Sign in to your account <ArrowRight className="icon-arrow" />
                                     </Link>
                                 </div>
                             </form>
@@ -756,7 +346,7 @@ function RegisterContent() {
     );
 }
 
-// Renamed and Exported for compatibility
+// Wrapper component remains the same
 const Register = () => {
     return <RegisterContent />;
 }
