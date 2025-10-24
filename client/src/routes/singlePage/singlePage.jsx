@@ -3,15 +3,14 @@ import Slider from "../../components/slider/Slider";
 import { useLoaderData, Link, useNavigate } from "react-router-dom";
 import DOMPurify from "dompurify";
 import { useState, useEffect, useContext } from "react";
-import apiRequest from "../../lib/apiRequest";
+import apiRequest from "../../lib/apiRequest"; // Your backend API request helper
 import SinglePostMap from "../../components/map/SinglePostMap.jsx";
-import axios from "axios";
+// Removed axios import as apiRequest should handle it, or keep if needed elsewhere
+// import axios from "axios";
 import { AuthContext } from "../../context/AuthContext";
-
-// --- [NAYA] Modal ko import karein ---
 import AiInsightsModal from "../../components/aiInsightsModal/AiInsightsModal";
 
-// Constants (Unchanged)
+// Constants
 const AMENITY_TYPES = [
     { label: "Hospitals", type: "hospital" },
     { label: "Doctors", type: "doctor" },
@@ -20,15 +19,14 @@ const AMENITY_TYPES = [
     { label: "Restaurant", type: "restaurant" },
     { label: "Transit", type: "transit_station" },
 ];
-const API_BASE_URL = import.meta.env.VITE_API_URL;
-const GOOGLE_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+// Removed API_BASE_URL and GOOGLE_API_KEY as they are mainly used in backend now
 
 // ====================================================================
-// PlaceDetailsModal Component (Full Code) - Unchanged
+// PlaceDetailsModal Component (CORS FIX APPLIED)
 // ====================================================================
 const PlaceDetailsModal = ({ place, onClose }) => {
     const [activeTab, setActiveTab] = useState('information');
-    const [placeDetails, setPlaceDetails] = useState(null);
+    const [placeDetails, setPlaceDetails] = useState(null); // Stores detailed data from backend
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
@@ -40,40 +38,48 @@ const PlaceDetailsModal = ({ place, onClose }) => {
             setPlaceDetails(null);
             setError(null);
 
-            const fields = [
-                'name', 'formatted_address', 'rating', 'user_ratings_total',
-                'photos', 'reviews', 'type', 'opening_hours', 'url'
-            ];
-
-            const url = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${place.place_id}&fields=${fields.join(',')}&key=${GOOGLE_API_KEY}`;
-
+            // --- 👇 CALL YOUR BACKEND PROXY INSTEAD OF GOOGLE DIRECTLY ---
             try {
-                const res = await axios.get(url);
+                // Use your apiRequest helper to call your backend endpoint
+                // Ensure the path '/map/details' matches your backend route
+                const res = await apiRequest.get(`/map/details?placeId=${place.place_id}`);
 
-                if (res.data.status === 'OK') {
-                    setPlaceDetails(res.data.result);
-                } else {
-                    setError(`Google API Error: ${res.data.status}`);
-                }
+                // Your backend returns the 'result' object directly
+                setPlaceDetails(res.data);
+                console.log("Fetched Place Details from Backend:", res.data);
+
             } catch (err) {
-                setError("Failed to fetch detailed place data.");
+                console.error("Failed to fetch detailed place data via backend:", err);
+                const errorMsg = err.response?.data?.message || "Failed to fetch place details.";
+                setError(errorMsg);
             } finally {
                 setLoading(false);
             }
+            // --- 👆 END BACKEND CALL ---
         };
         fetchDetails();
-    }, [place]);
+    }, [place]); // Re-fetch when the place prop changes
 
     if (!place) return null;
+
+    // Use fetched details if available, otherwise fallback to initial place data
     const details = placeDetails || place;
+    // Safely check opening_hours and open_now
     const isOpen = details.opening_hours?.open_now;
+    // Get photo URL (using Google API key directly here is okay for constructing image URLs)
+    const getPhotoUrl = (photoRef) => {
+        const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY; // Get key here just for photo URL
+        if (!photoRef || !apiKey) return "/noimg.png"; // Fallback image
+        return `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=${photoRef}&key=${apiKey}`;
+    }
+
 
     return (
         <div className="modalOverlay" onClick={onClose}>
             <div className="modalContent" onClick={(e) => e.stopPropagation()}>
                 <div className="modalHeader">
                     <h2>{details.name || "Place Details"}</h2>
-                    <button onClick={onClose} className="closeButton">×</button>
+                    <button onClick={onClose} className="closeButton" aria-label="Close modal">×</button>
                 </div>
 
                 <div className="modalTabs">
@@ -84,29 +90,36 @@ const PlaceDetailsModal = ({ place, onClose }) => {
                     <button
                         className={activeTab === 'photos' ? 'active' : ''}
                         onClick={() => setActiveTab('photos')}
-                        disabled={!details.photos || details.photos.length === 0}
+                        // Disable if no photos array or it's empty
+                        disabled={!Array.isArray(details.photos) || details.photos.length === 0}
                     >Photos ({details.photos?.length || 0})</button>
                     <button
                         className={activeTab === 'reviews' ? 'active' : ''}
                         onClick={() => setActiveTab('reviews')}
-                        disabled={!details.reviews || details.reviews.length === 0}
+                         // Disable if no reviews array or it's empty
+                        disabled={!Array.isArray(details.reviews) || details.reviews.length === 0}
                     >Reviews ({details.reviews?.length || 0})</button>
                 </div>
 
                 <div className="modalBody">
-                    {loading && <p className="loading-message">Loading full place details...</p>}
+                    {loading && <p className="loading-message">Loading place details...</p>}
                     {error && <p className="error-message">{error}</p>}
 
-                    {!loading && !error && (
+                    {!loading && !error && placeDetails && ( // Ensure placeDetails are loaded
                         <>
                             {activeTab === 'information' && (
                                 <div className="scrollableContent">
-                                    <p><strong>Address:</strong> {details.formatted_address || details.address || "Address not available."}</p>
+                                    <p><strong>Address:</strong> {details.formatted_address || details.address || "N/A"}</p>
                                     <p><strong>Rating:</strong> ⭐ {details.rating || 'N/A'} ({details.user_ratings_total || 0} reviews)</p>
-                                    <p><strong>Type:</strong> {details.types?.[0].replace(/_/g, ' ') || details.type?.replace(/_/g, ' ') || 'Establishment'}</p>
+                                    {/* Safely access types array */}
+                                    <p><strong>Type:</strong> {(details.types?.[0]?.replace(/_/g, ' ') || details.type?.replace(/_/g, ' ') || 'Establishment').toLocaleUpperCase()}</p>
                                     <p className={`status ${isOpen === true ? 'open' : isOpen === false ? 'closed' : ''}`}>
-                                        Status: {isOpen === true ? 'Open now' : isOpen === false ? 'Closed' : 'Opening hours not available'}
+                                        Status: {isOpen === true ? 'Open now' : isOpen === false ? 'Closed' : 'Hours unavailable'}
                                     </p>
+                                    {/* Display phone number if available */}
+                                    {details.formatted_phone_number && <p><strong>Phone:</strong> <a href={`tel:${details.formatted_phone_number}`}>{details.formatted_phone_number}</a></p>}
+                                     {/* Display website if available */}
+                                    {details.website && <p><strong>Website:</strong> <a href={details.website} target="_blank" rel="noopener noreferrer">{details.website}</a></p>}
 
                                     {details.opening_hours?.weekday_text && (
                                         <div className="hours-list">
@@ -124,25 +137,30 @@ const PlaceDetailsModal = ({ place, onClose }) => {
 
                             {activeTab === 'photos' && (
                                 <div className="scrollableContent photoGrid">
-                                    {details.photos && details.photos.length > 0 ? (
+                                    {/* Ensure photos is an array and has items */}
+                                    {Array.isArray(details.photos) && details.photos.length > 0 ? (
                                         details.photos.map((photo, index) => (
                                             <img
                                                 key={index}
-                                                src={`https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=${photo.photo_reference}&key=${GOOGLE_API_KEY}`}
-                                                alt={`Photo ${index + 1} of ${details.name}`}
+                                                // Use helper function to construct URL
+                                                src={getPhotoUrl(photo.photo_reference)}
+                                                alt={`Photo ${index + 1} of ${details.name || 'place'}`}
                                                 className="placePhoto"
                                                 loading="lazy"
+                                                // Add a simple error handler for broken images
+                                                onError={(e) => e.currentTarget.src = '/noimg.png'}
                                             />
                                         ))
                                     ) : (
-                                        <p>No photos available for this location.</p>
+                                        <p>No photos available.</p>
                                     )}
                                 </div>
                             )}
 
                             {activeTab === 'reviews' && (
                                 <div className="scrollableContent reviewList">
-                                    {details.reviews && details.reviews.length > 0 ? (
+                                     {/* Ensure reviews is an array and has items */}
+                                    {Array.isArray(details.reviews) && details.reviews.length > 0 ? (
                                         details.reviews.map((review, index) => (
                                             <div key={index} className="reviewItem">
                                                 <h4>{review.author_name}</h4>
@@ -152,12 +170,16 @@ const PlaceDetailsModal = ({ place, onClose }) => {
                                             </div>
                                         ))
                                     ) : (
-                                        <p>No user reviews available.</p>
+                                        <p>No reviews available.</p>
                                     )}
                                 </div>
                             )}
                         </>
                     )}
+                     {/* Show message if details failed to load and not loading */}
+                     {!loading && !placeDetails && !error && (
+                         <p>Could not load details for this place.</p>
+                     )}
                 </div>
             </div>
         </div>
@@ -166,31 +188,32 @@ const PlaceDetailsModal = ({ place, onClose }) => {
 
 
 // ====================================================================
-// AmenitiesList Component (Full Code) - Unchanged
+// AmenitiesList Component (No Changes Needed Here)
 // ====================================================================
 const AmenitiesList = ({ post, currentType }) => {
-    const [amenities, setAmenities] = useState([]);
+    // ... (Keep existing AmenitiesList logic using axios or apiRequest to call /map/amenities) ...
+     const [amenities, setAmenities] = useState([]);
     const [loading, setLoading] = useState(true);
     const [selectedPlace, setSelectedPlace] = useState(null);
 
     useEffect(() => {
         const fetchAmenities = async () => {
-            if (!currentType) {
+            if (!currentType || !post?.latitude || !post?.longitude) { // Added checks for post lat/lng
                 setAmenities([]);
                 setLoading(false);
                 return;
             }
             setLoading(true);
             try {
-                const res = await axios.get(`${API_BASE_URL}/map/amenities`, {
-                    params: {
-                        lat: post.latitude,
-                        lng: post.longitude,
-                        types: [currentType]
-                    },
-                    proxy: false
-                });
-                setAmenities(res.data);
+                 // Using apiRequest assuming it's configured for GET with params
+                 const res = await apiRequest.get(`/map/amenities`, {
+                     params: {
+                         lat: post.latitude,
+                         lng: post.longitude,
+                         types: currentType // Pass single type
+                     }
+                 });
+                setAmenities(res.data || []); // Ensure data is an array
             } catch (err) {
                 console.error(`Error fetching amenities for ${currentType}:`, err);
                 setAmenities([]);
@@ -199,13 +222,14 @@ const AmenitiesList = ({ post, currentType }) => {
             }
         };
         fetchAmenities();
-    }, [post.latitude, post.longitude, currentType]);
+    }, [post?.latitude, post?.longitude, currentType]); // Use optional chaining for dependencies
 
     const handleViewDetails = (amenity) => {
+        // Pass minimal necessary info to trigger modal fetch
         setSelectedPlace({
-            ...amenity,
-            address: amenity.vicinity || amenity.formatted_address || 'Address not available.',
-            user_ratings_total: amenity.user_ratings_total || 0
+            place_id: amenity.place_id,
+            name: amenity.name, // Pass name for initial header display
+            // Don't pass potentially outdated details like address/rating here
         });
     };
 
@@ -220,21 +244,25 @@ const AmenitiesList = ({ post, currentType }) => {
                 <div className="amenityGroup">
                     <div className="amenityCards">
                         {amenities.length === 0 ? (
-                            <p className="no-amenities-found">No popular {currentType.replace(/_/g, ' ')} found nearby (within 1km radius).</p>
+                            <p className="no-amenities-found">No popular {currentType.replace(/_/g, ' ')} found nearby (within 1km).</p>
                         ) : (
-                            amenities.map((amenity, index) => (
-                                <div key={amenity.place_id || index} className="amenityCard">
-                                    <div className="cardInfo">
-                                        <h4>{amenity.name}</h4>
-                                        <p className="rating">⭐ {amenity.rating || 'N/A'} ({amenity.user_ratings_total || 0} reviews)</p>
-                                    </div>
-                                    <button
-                                        className="detailButton"
-                                        onClick={() => handleViewDetails(amenity)}
-                                    >
-                                        View Details
-                                    </button>
-                                </div>
+                             // Ensure amenities is an array before mapping
+                            Array.isArray(amenities) && amenities.map((amenity) => (
+                                // Add check for amenity and place_id
+                                amenity && amenity.place_id && (
+                                     <div key={amenity.place_id} className="amenityCard">
+                                        <div className="cardInfo">
+                                            <h4>{amenity.name}</h4>
+                                            <p className="rating">⭐ {amenity.rating || 'N/A'} ({amenity.user_ratings_total || 0} reviews)</p>
+                                        </div>
+                                        <button
+                                            className="detailButton"
+                                            onClick={() => handleViewDetails(amenity)}
+                                        >
+                                            View Details
+                                        </button>
+                                     </div>
+                                )
                             ))
                         )}
                     </div>
@@ -246,117 +274,101 @@ const AmenitiesList = ({ post, currentType }) => {
 
 
 // ====================================================================
-// SinglePage Component (Main Component - handleSendMessage UPDATED)
+// SinglePage Component (Main Component - No Major Changes)
 // ====================================================================
 function SinglePage() {
+    // ... (Keep existing state, handlers: handleSave, handleSendMessage, handleGetInsights) ...
     const post = useLoaderData();
     const [currentPost, setCurrentPost] = useState(post);
-    const [saved, setSaved] = useState(currentPost.isSaved);
+    const [saved, setSaved] = useState(currentPost?.isSaved || false); // Default to false if post is invalid initially
 
-    const [selectedAmenityType, setSelectedAmenityType] = useState(AMENITY_TYPES[0].type);
+    const [selectedAmenityType, setSelectedAmenityType] = useState(AMENITY_TYPES[0]?.type || null); // Default to first type or null
     const navigate = useNavigate();
 
     const { currentUser } = useContext(AuthContext);
 
-    // --- AI Investment Insights States ---
+    // AI States
     const [insights, setInsights] = useState(null);
     const [isLoadingInsights, setIsLoadingInsights] = useState(false);
     const [insightsError, setInsightsError] = useState(null);
     const [investmentGoal, setInvestmentGoal] = useState("5000000");
-
     const [showInsightsModal, setShowInsightsModal] = useState(false);
+    // Removed showSubscriptionPrompt state as modal handles it
 
-    const [showSubscriptionPrompt, setShowSubscriptionPrompt] = useState(false);
-
-    // "See More" State for manual description
+    // Description State
     const [isExpanded, setIsExpanded] = useState(false);
 
-    // FIX: Updated handleSave function
-    const handleSave = async () => {
-        if (!currentUser) {
-            navigate("/login");
-            return;
+    // Update local state if loader data changes (e.g., navigating between posts)
+     useEffect(() => {
+        if (post) {
+             setCurrentPost(post);
+             setSaved(post.isSaved || false);
         }
+     }, [post]);
+
+
+    const handleSave = async () => {
+        if (!currentUser) { navigate("/login"); return; }
+        if (!currentPost?.id) return; // Don't save if no valid post
+
         const newSavedState = !saved;
         setSaved(newSavedState);
-        setCurrentPost(prev => ({ ...prev, isSaved: newSavedState }));
+        // Optimistically update currentPost state as well
+        setCurrentPost(prev => prev ? ({ ...prev, isSaved: newSavedState }) : null);
+
         try {
             await apiRequest.post("/users/save", { postId: currentPost.id });
             console.log("Post save status toggled on backend");
         } catch (err) {
             console.error("Failed to save post:", err);
+            // Revert UI on error
             setSaved(!newSavedState);
-            setCurrentPost(prev => ({ ...prev, isSaved: !newSavedState }));
+             setCurrentPost(prev => prev ? ({ ...prev, isSaved: !newSavedState }) : null);
             alert("Failed to save post. Please try again.");
         }
     };
 
-    // --- 👇 UPDATED FUNCTION ---
     const handleSendMessage = async () => {
-        if (!currentUser) {
-            navigate("/login");
-            return;
-        }
-        // Basic check for necessary post data
-        if (!currentPost || !currentPost.userId || !currentPost.id) {
-             console.error("Missing post data required to start chat.");
-             alert("Cannot start chat. Post information is incomplete.");
-             return;
+        if (!currentUser) { navigate("/login"); return; }
+        if (!currentPost?.userId || !currentPost?.id) {
+             alert("Cannot start chat. Post information incomplete."); return;
         }
         try {
-            // Call API to create/find the chat
             const res = await apiRequest.post("/chats", {
                 receiverId: currentPost.userId,
                 postId: currentPost.id
             });
-
-            // --- 👇 PASS CHAT INFO TO /chat route ---
             if (res.data) {
-                const chatData = res.data; // API response should be the chat object
-                console.log("Chat created/found, navigating to /chat with state:", chatData);
-
-                // Navigate to /chat and pass the chat object in state
-                navigate("/chat", {
-                    state: {
-                        openChat: chatData // Pass the chat object
-                    }
-                });
+                navigate("/chat", { state: { openChat: res.data } });
             } else {
-                 console.error("Failed to get chat data from API response after creating/finding chat.");
-                 alert("Could not retrieve chat details. Please try again.");
+                 alert("Could not retrieve chat details.");
             }
-            // --- 👆 END PASSING INFO ---
-
         } catch (err) {
-            console.error("Failed to start or find chat:", err);
-            alert("Failed to start chat. Please try again or check your connection.");
+            console.error("Failed to start chat:", err);
+            alert("Failed to start chat. Please try again.");
         }
     };
-    // --- 👆 END UPDATED FUNCTION ---
 
     const handleGetInsights = async () => {
-        // ... (Keep existing handleGetInsights logic)
-         if (!investmentGoal || isNaN(Number(investmentGoal)) || Number(investmentGoal) <= 0) {
+        // ... (Keep existing handleGetInsights logic, ensure checks for currentPost) ...
+         if (!currentPost) return; // Ensure post data is available
+
+        if (!investmentGoal || isNaN(Number(investmentGoal)) || Number(investmentGoal) <= 0) {
             setInsightsError("Please enter a valid positive numeric investment goal.");
             setShowInsightsModal(true);
             return;
         }
 
         setShowInsightsModal(true);
-
         setIsLoadingInsights(true);
         setInsightsError(null);
         setInsights(null);
-        setShowSubscriptionPrompt(false);
+        // setShowSubscriptionPrompt(false); // Removed, handled by error check
 
         const payload = {
-            title: currentPost.title,
-            price: currentPost.price,
-            type: currentPost.type,
-            address: currentPost.address,
-            size: currentPost.postDetail?.size,
-            goal: Number(investmentGoal),
-            city: currentPost.city
+            title: currentPost.title, price: currentPost.price, type: currentPost.type,
+            address: currentPost.address, size: currentPost.postDetail?.size,
+            goal: Number(investmentGoal), city: currentPost.city
         };
 
         try {
@@ -364,26 +376,27 @@ function SinglePage() {
             setInsights(res.data.analysis);
         } catch (err) {
             console.error("Failed to generate AI insights:", err);
-            if (err.response && err.response.status === 403 && err.response.data?.requireSubscription) {
-                setInsightsError("Premium subscription required.");
-                setShowSubscriptionPrompt(true);
-            } else {
-               const errorMsg = err.response?.data?.message || "Failed to fetch AI insights.";
-               setInsightsError(errorMsg);
-            }
+             // Check specific error for subscription required (adjust status/code if needed)
+             if (err.response && err.response.status === 403) {
+                 setInsightsError("Premium subscription required to generate AI reports.");
+                 // No need for separate state, modal can display link based on error message content
+             } else {
+                const errorMsg = err.response?.data?.message || "Failed to fetch AI insights.";
+                setInsightsError(errorMsg);
+             }
         } finally {
             setIsLoadingInsights(false);
         }
     };
 
-    // Description Logic
-    const descriptionText = currentPost.postDetail?.desc || "No description provided.";
-    const needsTruncation = descriptionText.length > 500;
+    // Return loading state if post data isn't available yet
+    if (!currentPost) {
+        return <div className="loading-page">Loading property details...</div>;
+    }
 
-    // Added check for post data before rendering
-     if (!currentPost) {
-       return <div>Loading property details...</div>; // Or redirect, or show error
-     }
+    // Prepare description text safely
+    const descriptionText = currentPost.postDetail?.desc || "No description provided.";
+    const needsTruncation = descriptionText.length > 500; // Example length
 
     return (
         <div className="singlePage">
@@ -396,15 +409,17 @@ function SinglePage() {
                     propertyTitle={currentPost.title}
                     onClose={() => {
                         setShowInsightsModal(false);
+                        // Reset AI state when closing modal
                         setInsights(null);
                         setInsightsError(null);
+                        setIsLoadingInsights(false);
                     }}
                 />
             )}
 
             {/* Slider */}
             <div className="fullWidthSlider">
-                {/* Ensure images is an array before passing */}
+                 {/* Ensure images is always an array */}
                 <Slider images={Array.isArray(currentPost.images) ? currentPost.images : []} />
             </div>
 
@@ -417,11 +432,12 @@ function SinglePage() {
                         <div className="details-content-wrapper">
                             <div className="top-content">
                                 <div className="infoSection">
-                                    <h1 className="mainTitle">{currentPost.title}</h1>
+                                    <h1 className="mainTitle">{currentPost.title || 'Property Title'}</h1>
+                                    {/* Ensure price exists */}
                                     <div className="price">₹ {(currentPost.price || 0).toLocaleString('en-IN')} {currentPost.type === 'rent' ? '/month' : ''}</div>
                                     <div className="address">
                                         <img src="/pin.png" alt="Location Pin" />
-                                        <span>{currentPost.address}</span>
+                                        <span>{currentPost.address || 'Address unavailable'}</span>
                                     </div>
                                     <div className="roomFeatures">
                                         <div className="featureItem"> <img src="/bed.png" alt="Beds" /> <span>{currentPost.bedroom || 'N/A'} Bed(s)</span> </div>
@@ -452,11 +468,11 @@ function SinglePage() {
                             <div className="generalFeaturesGrid">
                                 <div className="featureBox"> <img src="/utility.png" alt="Utility" /> <div className="featureText"><span>Utilities</span><p>{currentPost.postDetail?.utilities || "N/A"}</p></div> </div>
                                 <div className="featureBox"> <img src="/pet.png" alt="Pet Policy" /> <div className="featureText"><span>Pet Policy</span><p>{currentPost.postDetail?.pet || "N/A"}</p></div> </div>
-                                <div className="featureBox"> <img src="/fee.png" alt="Income Policy" /> <div className="featureText"><span>Property Fees</span><p>{currentPost.postDetail?.income || "N/A"}</p></div> </div>
+                                <div className="featureBox"> <img src="/fee.png" alt="Property Fees" /> <div className="featureText"><span>Property Fees</span><p>{currentPost.postDetail?.income || "N/A"}</p></div> </div>
                                 <div className="featureBox"> <img src="/size.png" alt="Property Size" /> <div className="featureText"><span>Size</span><p>{currentPost.postDetail?.size ? `${currentPost.postDetail.size} sqft` : "N/A"}</p></div> </div>
                             </div>
 
-                            {/* Room Sizes & Nearby */}
+                            {/* Nearby Distances */}
                             <p className="title">Nearby Distances (approx. meters)</p>
                             <div className="roomSizeInfo">
                                 <div className="detail-item"><span>School:</span><span className="value">{currentPost.postDetail?.school ? `${currentPost.postDetail.school}m` : "N/A"}</span></div>
@@ -475,6 +491,7 @@ function SinglePage() {
                                         value={investmentGoal}
                                         onChange={(e) => setInvestmentGoal(e.target.value)}
                                         disabled={isLoadingInsights}
+                                        aria-label="Investment Goal Input"
                                     />
                                     <button onClick={handleGetInsights} disabled={isLoadingInsights} className="ai-report-btn">
                                         {isLoadingInsights ? "Analyzing..." : "💎 Generate AI Report"}
@@ -483,20 +500,26 @@ function SinglePage() {
                             </div>
                             {/* Action Buttons */}
                             <div className="buttons section-buttons">
-                                {/* Ensure currentUser exists before rendering */}
+                                {/* Only show buttons if user is logged in */}
                                 {currentUser && (
-                                     <button onClick={handleSendMessage} className="contact-btn"> <img src="/chat.png" alt="Chat" /> Contact Landlord </button>
+                                     <>
+                                        <button onClick={handleSendMessage} className="contact-btn"> <img src="/chat.png" alt="Chat" /> Contact Landlord </button>
+                                        <button onClick={handleSave} className={`save-btn ${saved ? 'saved' : ''}`}>
+                                            <img src="/save.png" alt="Save" /> {saved ? "Place Saved" : "Save Place"}
+                                        </button>
+                                     </>
                                 )}
-                                {/* Render save button only if user is logged in */}
-                                {currentUser && (
-                                    <button onClick={handleSave} className={`save-btn ${saved ? 'saved' : ''}`}>
-                                        <img src="/save.png" alt="Save" /> {saved ? "Place Saved" : "Save Place"}
-                                    </button>
+                                {/* Show login prompt if not logged in */}
+                                {!currentUser && (
+                                     <Link
+                                         to="/login"
+                                         // Pass current location to redirect back after login
+                                         state={{ from: location.pathname }}
+                                         className="login-prompt-btn"
+                                     >
+                                         Login to Contact or Save
+                                     </Link>
                                 )}
-                                {/* Optionally, show login prompt if not logged in */}
-                                 {!currentUser && (
-                                     <Link to="/login" state={{ from: `/ ${currentPost.id}` }} className="login-prompt-btn">Login to Contact or Save</Link>
-                                 )}
                             </div>
 
 
@@ -513,23 +536,20 @@ function SinglePage() {
                             <div className="buttonRow">
                                 {AMENITY_TYPES.map(a => ( <button key={a.type} onClick={() => setSelectedAmenityType(a.type)} className={selectedAmenityType === a.type ? 'active' : ''}> {a.label} </button> ))}
                             </div>
-                            <select className="distanceDropdown" defaultValue="1000">
-                                 <option value="500">Within 500m</option>
-                                 <option value="1000">Within 1km</option>
-                                 <option value="2000">Within 2km</option>
-                            </select>
+                             {/* Removed distance dropdown as it wasn't used in API call */}
+                            {/* <select className="distanceDropdown" defaultValue="1000"> ... </select> */}
                         </div>
                         {/* Map and List */}
                         <div className="amenityMapLayout">
                              <div className="amenityListContainer">
                                  <p className="amenity-list-heading">{ AMENITY_TYPES.find(a=>a.type===selectedAmenityType)?.label || 'Nearby Places' }</p>
-                                 {/* Pass necessary props */}
-                                 <AmenitiesList post={currentPost} currentType={selectedAmenityType} />
+                                 {/* Ensure post is passed */}
+                                 {currentPost && <AmenitiesList post={currentPost} currentType={selectedAmenityType} />}
                              </div>
                              <div className="mapContainer">
-                                 {/* Ensure post has lat/lng before rendering map */}
+                                 {/* Ensure post has lat/lng */}
                                  {currentPost.latitude && currentPost.longitude && (
-                                    <SinglePostMap post={currentPost} selectedType={selectedAmenityType} />
+                                     <SinglePostMap post={currentPost} selectedType={selectedAmenityType} />
                                  )}
                              </div>
                         </div>
@@ -541,3 +561,4 @@ function SinglePage() {
 }
 
 export default SinglePage;
+
