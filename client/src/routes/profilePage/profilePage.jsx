@@ -1,25 +1,52 @@
-import { useContext, useEffect, useState } from "react";
-import { Link, useLoaderData, useNavigate } from "react-router-dom";
+import { useContext, useEffect, useState, useRef } from "react";
+import { Link, useLoaderData, useNavigate, useLocation } from "react-router-dom";
 import List from "../../components/list/List";
 import apiRequest from "../../lib/apiRequest";
 import { AuthContext } from "../../context/AuthContext";
 import "./profilePage.scss";
 
+// --- 👇 Confirmation Modal Component ---
+const ConfirmationModal = ({ isOpen, message, onConfirm, onCancel }) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="modalOverlay">
+      <div className="modalContent">
+        <p>{message}</p>
+        <div className="modalActions">
+          <button onClick={onConfirm} className="confirmButton">Yes, Delete</button>
+          <button onClick={onCancel} className="cancelButton">Cancel</button>
+        </div>
+      </div>
+    </div>
+  );
+};
+// --- 👆 End Confirmation Modal Component ---
+
+
 function ProfilePage() {
   const data = useLoaderData();
   const { updateUser, currentUser } = useContext(AuthContext);
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [userPosts, setUserPosts] = useState([]);
   const [savedPosts, setSavedPosts] = useState([]);
 
+  // --- 👇 State for Delete Confirmation Modal ---
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [postToDelete, setPostToDelete] = useState(null); // Store the ID of the post to delete
+  // --- 👆 End Modal State ---
+
+  const savedListRef = useRef(null);
+
   // useEffect for processing post data
   useEffect(() => {
     const processPostData = async () => {
-      if (data.postResponse) {
+      // ... (keep existing data processing logic) ...
+       if (data.postResponse) {
         try {
           const postData = await data.postResponse;
-          // Ensure data exists before accessing properties
           const rawUserPosts = postData.data?.userPosts || [];
           const rawSavedPosts = postData.data?.savedPosts || [];
 
@@ -42,19 +69,41 @@ function ProfilePage() {
     processPostData();
   }, [data.postResponse]);
 
+  // useEffect for scrolling
+  useEffect(() => {
+    // ... (keep existing scrolling logic) ...
+     if (location.state?.scrollTo === "saved" && savedListRef.current) {
+      savedListRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
+
 
   const handleSavePost = async (post) => {
-    // ... (keep existing handleSavePost logic)
-        const originalUserPosts = [...userPosts];
+    // ... (keep existing handleSavePost logic) ...
+     const originalUserPosts = [...userPosts];
     const originalSavedPosts = [...savedPosts];
 
     const updatedUserPosts = userPosts.map((p) =>
       p.id === post.id ? { ...p, isSaved: !p.isSaved } : p
     );
-    setUserPosts(updatedUserPosts);
+    const updatedSavedPostsList = savedPosts.map((p) =>
+       p.id === post.id ? { ...p, isSaved: !p.isSaved } : p
+    );
+
+     if (userPosts.find(p => p.id === post.id)) {
+       setUserPosts(updatedUserPosts);
+     }
+     if (savedPosts.find(p => p.id === post.id)) {
+       setSavedPosts(updatedSavedPostsList);
+     }
 
     if (!post.isSaved) {
-      setSavedPosts((prev) => [...prev, { ...post, isSaved: true }]);
+       if (!savedPosts.find(p => p.id === post.id)) {
+           setSavedPosts((prev) => [...prev, { ...post, isSaved: true }]);
+       } else {
+           setSavedPosts(updatedSavedPostsList);
+       }
     } else {
       setSavedPosts((prev) => prev.filter((p) => p.id !== post.id));
     }
@@ -62,74 +111,116 @@ function ProfilePage() {
     try {
       await apiRequest.post("/users/save", { postId: post.id });
     } catch (err) {
-      console.log(err);
+      console.log("Save error:", err);
       setUserPosts(originalUserPosts);
       setSavedPosts(originalSavedPosts);
     }
   };
 
-  // --- 👇 UPDATED FUNCTION ---
+
   const handleSendMessage = async (post) => {
-    if (!currentUser) {
+    // ... (keep existing handleSendMessage logic) ...
+     if (!currentUser) {
       navigate("/login");
       return;
     }
     if (!post || !post.userId) {
       console.error("Post data is missing or invalid for sending message.");
-      return; // Prevent API call if post data is bad
+      return;
     }
 
     try {
-      // Create/find the chat
       const res = await apiRequest.post("/chats", {
         receiverId: post.userId,
         postId: post.id,
       });
 
-      // --- 👇 PASS CHAT INFO TO /chat route ---
       if (res.data) {
-        // Assuming the API returns the chat object upon creation/retrieval
         const chatData = res.data;
         console.log("Chat created/found, navigating to /chat with state:", chatData);
 
-        // Pass the entire chat object or necessary details
         navigate("/chat", {
           state: {
-            openChat: chatData // Pass the chat object
+            openChat: chatData
           }
         });
       } else {
          console.error("Failed to get chat data from API response.");
          alert("Could not start chat. Please try again.");
       }
-      // --- 👆 END PASSING INFO ---
 
     } catch (err) {
       console.error("Failed to start chat:", err);
-      // Use a more user-friendly error message if possible
       alert("Failed to start chat. Please try again or check your connection.");
     }
   };
 
   const handleLogout = async () => {
-    try {
+    // ... (keep existing handleLogout logic) ...
+     try {
       await apiRequest.post("/auth/logout");
       updateUser(null);
       navigate("/");
-    // 👇 --- FIXED SYNTAX HERE ---
-    } catch (err) { // Added opening brace {
+    } catch (err) {
       console.log(err);
-    } // Moved closing brace } here
-    // 👆 --- END FIX ---
+    }
   };
 
-  // Ensure currentUser is loaded before rendering sensitive info
+  // --- 👇 MODIFIED: This function now OPENS the modal ---
+  const handleDeletePost = (postId) => {
+     console.log("Requesting delete for post:", postId);
+     setPostToDelete(postId); // Set the ID of the post to be deleted
+     setIsModalOpen(true);    // Open the modal
+  };
+  // --- 👆 END MODIFICATION ---
+
+  // --- 👇 ADDED: Function to CONFIRM deletion ---
+  const confirmDelete = async () => {
+     if (!postToDelete) return; // Exit if no post ID is set
+
+     const postId = postToDelete;
+     setIsModalOpen(false); // Close modal immediately
+     setPostToDelete(null); // Clear the ID
+
+     // Optimistic UI update
+     const originalUserPosts = [...userPosts];
+     setUserPosts((prevPosts) => prevPosts.filter(post => post.id !== postId));
+
+     try {
+       await apiRequest.delete(`/posts/${postId}`);
+       console.log(`Post ${postId} deleted successfully.`);
+       setSavedPosts((prevPosts) => prevPosts.filter(post => post.id !== postId));
+     } catch (err) {
+       console.error(`Failed to delete post ${postId}:`, err);
+       // Revert UI on error
+       setUserPosts(originalUserPosts);
+       alert("Failed to delete post. Please try again.");
+     }
+  };
+  // --- 👆 END CONFIRM function ---
+
+  // --- 👇 ADDED: Function to CANCEL deletion ---
+  const cancelDelete = () => {
+     setIsModalOpen(false);
+     setPostToDelete(null);
+  };
+  // --- 👆 END CANCEL function ---
+
   if (!currentUser) {
-    return <div>Loading profile...</div>; // Or a spinner component
+    return <div>Loading profile...</div>;
   }
 
   return (
     <div className="profilePage">
+       {/* --- 👇 Render Confirmation Modal --- */}
+       <ConfirmationModal
+          isOpen={isModalOpen}
+          message="Are you sure you want to delete this post? This action cannot be undone."
+          onConfirm={confirmDelete}
+          onCancel={cancelDelete}
+       />
+       {/* --- 👆 End Modal Render --- */}
+
       <div className="details">
         <div className="wrapper">
           <div className="title">
@@ -139,7 +230,8 @@ function ProfilePage() {
             </Link>
           </div>
           <div className="info">
-            <span>
+            {/* ... (user info content) ... */}
+             <span>
               Avatar:
               <img
                 src={currentUser.avatar || "/noavatar.jpg"}
@@ -163,15 +255,17 @@ function ProfilePage() {
           <List
             posts={userPosts}
             onSave={handleSavePost}
-            onSendMessage={handleSendMessage} // Pass updated function
+            onSendMessage={handleSendMessage}
+            onDelete={handleDeletePost} // Pass the function that opens the modal
+            showDelete={true}
           />
-          <div className="title">
+          <div className="title" ref={savedListRef}>
             <h1>Saved List</h1>
           </div>
           <List
             posts={savedPosts}
             onSave={handleSavePost}
-            onSendMessage={handleSendMessage} // Pass updated function
+            onSendMessage={handleSendMessage}
           />
         </div>
       </div>
