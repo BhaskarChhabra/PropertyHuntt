@@ -471,7 +471,7 @@ function Login() {
                                             <Home className="w-6 h-6 text-white" />
                                         </div>
                                         <h1 className="logo-title">
-                                            BuildEstate
+                                            PropertyHuntt
                                         </h1>
                                         <div className="sparkle-icon">
                                             <Sparkles className="w-5 h-5" />
