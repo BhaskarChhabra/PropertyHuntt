@@ -1,25 +1,30 @@
 import React, { useState } from "react";
-// Assuming you have these components/hooks in your project
 import { Link, useNavigate } from "react-router-dom";
-import apiRequest from "../../lib/apiRequest"; // Assuming this is your API request utility
+// Using real dependencies
+import apiRequest from "../../lib/apiRequest"; 
+// Removed AuthContext import as it's not needed for registration logic itself
+// (Login page will handle the redirect and context update)
 
-// --- START: SVG Icon Definitions (Only Used Icons) ---
+// --- START: SVG Icon Definitions ---
 const User = (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>;
-const Key = (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m10 14 4-4"/><path d="M18 10a1.5 1.5 0 0 0-3 0m3 0 1.5-1.5L21 7l-1.5 1.5"/><path d="m14 6-4-4-4 4 4 4"/><path d="M12 22s-8-4-8-10 8-10 8-10 8 4 8 10-8 10-8 10Z"/></svg>; // Updated Key Icon (Simpler)
+const Key = (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m10 14 4-4"/><path d="M18 10a1.5 1.5 0 0 0-3 0m3 0 1.5-1.5L21 7l-1.5 1.5"/><path d="m14 6-4-4-4 4 4 4"/><path d="M12 22s-8-4-8-10 8-10 8-10 8 4 8 10-8 10-8 10Z"/></svg>;
 const Mail = (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>;
 const CheckCircle = (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>;
-const ArrowRight = (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>; // Updated Arrow Icon
-const Loader = (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>; // Updated Loader Icon (Spinner)
+const ArrowRight = (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>;
+const Loader = (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>;
+const Sparkles = (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3v3m-3 3 1.5 1.5m6 0L15 6m3 3-1.5 1.5M6 18h12m-3-3 1.5-1.5m-6 0L9 15m0 3 1.5-1.5m6 0-1.5-1.5M12 21v-3"/></svg>;
+const Shield = (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>;
+const Home = (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>;
 const FaEye = ({ size = 20, className = "" }) => <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>;
-const FaEyeSlash = ({ size = 20, className = "" }) => <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" x2="22" y1="2" y2="22"/></svg>; // Updated EyeSlash Icon
-// Removed: Sparkles, Shield, Home, Verified, Fingerprint, Globe
+const FaEyeSlash = ({ size = 20, className = "" }) => <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" x2="22" y1="2" y2="22"/></svg>;
+const GoogleLogo = () => <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8c-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4C12.955 4 4 12.955 4 24s8.955 20 20 20s20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z"></path><path fill="#FF3D00" d="M6.306 14.691L22.999 4l1.694 2.866l-16.635 11.233z"></path><path fill="#4CAF50" d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238C29.211 35.091 26.715 36 24 36c-5.202 0-9.619-3.317-11.283-7.946l-6.522 5.025C9.505 39.556 16.227 44 24 44z"></path><path fill="#1976D2" d="M43.611 20.083H42V20H24v8h11.303c-0.792 2.237-2.231 4.166-4.087 5.571l6.19 5.238C39.999 36.31 44 30.603 44 24c0-1.341-.138-2.65-.389-3.917z"></path></svg>;
 // --- END: SVG Icon Definitions ---
 
 function RegisterContent() {
     const [error, setError] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [password, setPassword] = useState("");
-    const navigate = useNavigate(); // Using actual hook
+    const navigate = useNavigate();
 
     const [showPassword, setShowPassword] = useState(false);
     const [usernameFocused, setUsernameFocused] = useState(false);
@@ -51,6 +56,7 @@ function RegisterContent() {
     };
     const strength = getPasswordStrength(password);
 
+    // --- Standard Registration Handler ---
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError("");
@@ -59,34 +65,29 @@ function RegisterContent() {
 
         const username = formData.get("username");
         const email = formData.get("email");
-        const passwordValue = formData.get("password"); // Renamed variable
+        const passwordValue = formData.get("password");
 
-        // Basic frontend validation
         if (!username || !email || !passwordValue) {
             setError("All fields are required.");
             setIsLoading(false);
             return;
         }
-        if (passwordValue.length < 6) { // Example: Minimum password length
-             setError("Password must be at least 6 characters long.");
-             setIsLoading(false);
-             return;
+        if (passwordValue.length < 6) {
+            setError("Password must be at least 6 characters long.");
+            setIsLoading(false);
+            return;
         }
 
         try {
-            // Using actual apiRequest
             const res = await apiRequest.post("/auth/register", {
                 username,
                 email,
-                password: passwordValue, // Use renamed variable
+                password: passwordValue,
             });
-
-            console.log("Registration successful:", res.data); // Log success
-            navigate("/login"); // Navigate using actual hook
-
+            console.log("Registration successful:", res.data);
+            navigate("/login"); // Redirect to login page after successful registration
         } catch (err) {
             console.error("Registration Error:", err);
-            // Extract error message reliably
             const message = err.response?.data?.message || err.message || "Registration failed. Please try again.";
             setError(message);
         } finally {
@@ -94,26 +95,34 @@ function RegisterContent() {
         }
     };
 
+    // --- Google Signup Handler ---
+    const handleGoogleSignup = () => {
+        // Redirect to the same backend Google auth route
+        // The backend will handle new user creation vs. login
+        const VITE_API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8800/api';
+        window.location.href = `${VITE_API_URL}/auth/google`;
+    };
+
     return (
         <div className="login-page">
-            {/* Inline Styles */}
+            {/* START: Inline Styles */}
             <style>
                 {`
-                /* Basic Reset */
+                /* CSS Reset and Base Styles */
                 .login-page * { box-sizing: border-box; font-family: 'Inter', sans-serif; }
                 .login-page { min-height: 100vh; position: relative; overflow: hidden; background-color: #f7f9fc; }
-
+                
                 /* Text Colors */
                 .text-blue-500 { color: #3b82f6; }
                 .text-green-500 { color: #10b981; }
-                .text-purple-500 { color: #8b5cf6; } /* Adjusted purple */
+                .text-purple-500 { color: #8b5cf6; }
                 .text-gray-700 { color: #374151; }
                 .text-gray-600 { color: #4b5563; }
                 .text-gray-800 { color: #1f2937; }
                 .text-gray-500 { color: #6b7280; }
-                .text-error { color: #ef4444; margin-top: 0.75rem; text-align: center; font-weight: 500; background-color: #fee2e2; padding: 0.5rem; border-radius: 0.5rem; border: 1px solid #f87171; font-size: 0.875rem;}
+                .text-error { color: #ef4444; margin-top: 0.75rem; text-align: center; font-weight: 500; background-color: #fee2e2; padding: 0.75rem 1rem; border-radius: 0.5rem; border: 1px solid #f87171; font-size: 0.9rem; }
 
-                /* Background Gradient & Blobs */
+                /* Background & Blobs */
                 .bg-main { position: absolute; inset: 0; background: linear-gradient(to bottom right, #eff6ff, #eef2ff, #f5f3ff); }
                 .bg-main::before, .bg-main::after { content: ''; position: absolute; inset: 0; }
                 .bg-main::before { background: linear-gradient(to top right, rgba(219, 234, 254, 0.3), transparent, rgba(237, 233, 254, 0.3)); }
@@ -124,39 +133,40 @@ function RegisterContent() {
                 .blob-2 { bottom: 8rem; right: 8rem; width: 10rem; height: 10rem; background: rgba(168, 85, 247, 0.2); animation-delay: -2s; }
                 .blob-3 { top: 40%; right: 5rem; width: 6rem; height: 6rem; background: rgba(74, 222, 128, 0.2); animation-delay: -4s; }
 
-                /* Login Wrapper & Card */
+                /* Wrapper & Card */
                 .login-wrapper { position: relative; z-index: 10; display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 4rem 1rem; }
                 .login-card-container { width: 100%; max-width: 28rem; }
                 .login-card { position: relative; background-color: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border-radius: 1.5rem; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1); border: 1px solid rgba(255, 255, 255, 0.6); overflow: hidden; padding: 2.5rem 2rem; }
-
-                /* Card Decorations */
                 .card-deco-top, .card-deco-bottom { position: absolute; border-radius: 9999px; filter: blur(20px); z-index: -1; }
                 .card-deco-top { top: -1.5rem; right: -1.5rem; width: 6rem; height: 6rem; background: rgba(59, 130, 246, 0.15); }
                 .card-deco-bottom { bottom: -1.5rem; left: -1.5rem; width: 8rem; height: 8rem; background: rgba(147, 51, 234, 0.15); }
 
-                /* Header Section */
+                /* Header */
                 .header-section { text-align: center; margin-bottom: 2rem; }
-                .logo-link { display: inline-block; transition: transform 0.2s; }
+                .logo-link { display: inline-block; transition: transform 0.2s; text-decoration: none; }
                 .logo-link:hover { transform: scale(1.05); }
                 .logo-group { display: flex; align-items: center; justify-content: center; gap: 0.75rem; margin-bottom: 1rem; }
                 .logo-icon-wrapper { padding: 0.75rem; background: linear-gradient(to bottom right, #3b82f6, #6366f1); border-radius: 0.75rem; box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.2), 0 4px 6px -4px rgba(59, 130, 246, 0.1); display: inline-flex; }
-                .logo-icon-wrapper svg { width: 1.5rem; height: 1.5rem; color: white; } /* Ensure Home icon is sized */
+                .logo-icon-wrapper svg { width: 1.5rem; height: 1.5rem; color: white; }
                 .logo-title { font-size: 1.75rem; font-weight: 700; color: #374151; }
                 .header-text h2 { font-size: 1.5rem; font-weight: bold; color: #1f2937; margin-bottom: 0.5rem; }
                 .header-text p { color: #4b5563; display: flex; align-items: center; justify-content: center; gap: 0.5rem; font-size: 0.9rem;}
-                .header-text svg { width: 1rem; height: 1rem; } /* Size for Shield icon */
+                .header-text svg { width: 1rem; height: 1rem; }
+                @keyframes sparkle { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+                .sparkle-icon { animation: sparkle 3s infinite ease-in-out; color: #facc15; }
+                .sparkle-icon svg { width: 1.25rem; height: 1.25rem; }
 
                 /* Form & Inputs */
                 .login-form { display: flex; flex-direction: column; gap: 1.25rem; }
                 .input-group { display: flex; flex-direction: column; gap: 0.5rem; }
                 .input-label { display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem; font-weight: 600; color: #374151; }
-                .input-label svg { width: 1rem; height: 1rem; } /* Size icons in label */
+                .input-label svg { width: 1rem; height: 1rem; }
                 .input-field-wrapper { position: relative; }
                 .input-field { width: 100%; padding: 0.9rem 1rem 0.9rem 2.75rem; padding-right: 2.75rem; border-radius: 0.75rem; background-color: rgba(249, 250, 251, 0.9); border: 1px solid #e5e7eb; transition: all 0.3s; color: #1f2937; outline: none; font-size: 0.9rem; }
                 .input-field::placeholder { color: #9ca3af; }
                 .input-field:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15); background-color: white; }
                 .input-icon { position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: #9ca3af; pointer-events: none; }
-                .input-icon svg { width: 1.25rem; height: 1.25rem; } /* Size icons in input */
+                .input-icon svg { width: 1.25rem; height: 1.25rem; }
 
                 /* Show/Hide Password */
                 .toggle-password-btn { position: absolute; right: 0.75rem; top: 50%; transform: translateY(-50%); color: #9ca3af; padding: 0.35rem; border-radius: 0.5rem; transition: color 0.3s, background-color 0.3s; cursor: pointer; background: none; border: none; display: flex; align-items: center; justify-content: center;}
@@ -179,8 +189,34 @@ function RegisterContent() {
                 @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
                 .loader-icon { animation: spin 1s linear infinite; }
 
+                /* --- Google Button (Copied from Login) --- */
+                .btn-google {
+                    width: 100%;
+                    padding: 0.9rem 1rem;
+                    border-radius: 0.75rem;
+                    border: 1px solid #d1d5db;
+                    background: #ffffff;
+                    color: #374151;
+                    font-weight: 500;
+                    font-size: 0.9rem;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 0.75rem;
+                    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+                    cursor: pointer;
+                    transition: all 0.3s;
+                }
+                .btn-google:hover {
+                    background-color: #f9fafb;
+                    border-color: #adb5bd;
+                }
+                .btn-google svg { /* GoogleLogo uses width/height props */
+                    margin-right: 0.5rem;
+                }
+                
                 /* Divider & Alt Link */
-                .divider { position: relative; margin: 1.75rem 0; }
+                .divider { position: relative; margin: 1.25rem 0; } /* Reduced margin */
                 .divider::before { content: ''; position: absolute; top: 50%; left: 0; right: 0; height: 1px; background-color: #d1d5db; z-index: 1; }
                 .divider-text { position: relative; display: flex; justify-content: center; z-index: 2; }
                 .divider-text span { padding: 0 0.75rem; background-color: rgba(255, 255, 255, 0.95); color: #6b7280; font-size: 0.8rem; font-weight: 500; backdrop-filter: blur(10px);}
@@ -196,12 +232,13 @@ function RegisterContent() {
                     .login-card { padding: 2rem 1.25rem; }
                     .header-section { margin-bottom: 1.5rem; }
                     .login-form { gap: 1rem; }
-                    .btn-submit, .btn-alt-link { padding: 0.8rem 1rem; font-size: 0.9rem;}
+                    .btn-submit, .btn-alt-link, .btn-google { padding: 0.8rem 1rem; font-size: 0.9rem;}
                     .input-field { padding: 0.8rem 1rem 0.8rem 2.5rem; padding-right: 2.5rem;}
                     .input-icon svg, .toggle-password-btn svg { width: 1.1rem; height: 1.1rem;}
                 }
                 `}
             </style>
+            {/* END: Inline Styles */}
 
             {/* Background */}
             <div className="bg-main">
@@ -223,18 +260,18 @@ function RegisterContent() {
                                 <Link to="/" className="logo-link">
                                     <div className="logo-group">
                                         <div className="logo-icon-wrapper">
-                                            {/* Assuming you have a Home icon */}
-                                            {/* If not using react-icons, replace with <img> or SVG */}
-                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M11.47 3.84a.75.75 0 0 1 1.06 0l8.69 8.69a.75.75 0 1 0 1.06-1.06l-8.68-8.69a2.25 2.25 0 0 0-3.182 0l-8.69 8.69a.75.75 0 1 0 1.061 1.06l8.69-8.69Z"/><path d="m12 5.432 8.159 8.159c.03.03.06.058.091.086v6.198c0 1.035-.84 1.875-1.875 1.875H15a.75.75 0 0 1-.75-.75v-4.5a.75.75 0 0 0-.75-.75h-3a.75.75 0 0 0-.75.75V21a.75.75 0 0 1-.75.75H5.625a1.875 1.875 0 0 1-1.875-1.875v-6.198a2.29 2.29 0 0 0 .091-.086L12 5.43Z"/></svg>
+                                            <Home style={{ width: "1.5rem", height: "1.5rem", color: "white" }} />
                                         </div>
                                         <h1 className="logo-title">PropertyHuntt</h1>
+                                        <div className="sparkle-icon">
+                                            <Sparkles style={{ width: "1.25rem", height: "1.25rem" }} />
+                                        </div>
                                     </div>
                                 </Link>
                                 <div className="header-text">
                                     <h2>Join the Community!</h2>
                                     <p>
-                                        {/* Assuming Shield icon */}
-                                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="text-blue-500"><path fillRule="evenodd" d="M12.963 2.286a.75.75 0 0 0-1.071-.136 9.742 9.742 0 0 0-3.539 6.177A7.547 7.547 0 0 1 6.648 6.61a.75.75 0 0 0-1.152-.082A9 9 0 1 0 15.68 4.534a7.46 7.46 0 0 1-2.717-2.248ZM15.75 14.25a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z" clipRule="evenodd" /></svg>
+                                         <Shield style={{ width: "1rem", height: "1rem" }} className="text-blue-500" />
                                         Create your secure account
                                     </p>
                                 </div>
@@ -258,8 +295,7 @@ function RegisterContent() {
                                         />
                                         <div className="input-icon"><User style={getStyle(usernameFocused)}/></div>
                                     </div>
-                                    {/* Add aria-live region for potential username errors */}
-                                     <div id="username-error" aria-live="polite" style={{ height: '1rem' }}></div>
+                                    <div id="username-error" aria-live="polite" style={{ height: '1rem', fontSize: '0.75rem', color: '#ef4444' }}></div>
                                 </div>
 
                                 {/* Email */}
@@ -277,7 +313,7 @@ function RegisterContent() {
                                         />
                                         <div className="input-icon"><Mail style={getStyle(emailFocused)}/></div>
                                     </div>
-                                     <div id="email-error" aria-live="polite" style={{ height: '1rem' }}></div>
+                                    <div id="email-error" aria-live="polite" style={{ height: '1rem', fontSize: '0.75rem', color: '#ef4444' }}></div>
                                 </div>
 
                                 {/* Password */}
@@ -300,7 +336,7 @@ function RegisterContent() {
                                             {showPassword ? <FaEyeSlash /> : <FaEye />}
                                         </button>
                                     </div>
-                                     {/* Password Strength Meter */}
+                                    {/* Password Strength Meter */}
                                     {password.length > 0 && (
                                         <div className="strength-meter-container" id="password-strength">
                                              <p className="strength-label">
@@ -311,7 +347,7 @@ function RegisterContent() {
                                              </div>
                                          </div>
                                     )}
-                                     <div id="password-error" aria-live="polite" style={{ height: '1rem' }}></div>
+                                    <div id="password-error" aria-live="polite" style={{ height: '1Erem', fontSize: '0.75rem', color: '#ef4444' }}></div>
                                 </div>
 
                                 {/* Submit Button */}
@@ -326,6 +362,17 @@ function RegisterContent() {
                                 {/* Error Display */}
                                 {error && <p className="text-error" role="alert">{error}</p>}
 
+                                {/* --- Google Signup Button --- */}
+                                <button
+                                  type="button"
+                                  onClick={handleGoogleSignup}
+                                  className="btn-google"
+                                >
+                                  <GoogleLogo />
+                                  Sign up with Google
+                                </button>
+                                {/* --- END GOOGLE BUTTON --- */}
+
                                 {/* Divider */}
                                 <div className="divider">
                                     <div className="divider-text"><span>Already joined?</span></div>
@@ -334,7 +381,9 @@ function RegisterContent() {
                                 {/* Login Link */}
                                 <div>
                                     <Link to="/login" className="btn-alt-link">
-                                        <User className="icon-user" /> Sign in to your account <ArrowRight className="icon-arrow" />
+                                        <User style={{ color: "#6b7280" }} className="icon-user" />
+                                        Sign in to your account
+                                        <ArrowRight className="icon-arrow" style={{ color: "#6b7280" }} />
                                     </Link>
                                 </div>
                             </form>
@@ -352,3 +401,4 @@ const Register = () => {
 }
 
 export default Register;
+
