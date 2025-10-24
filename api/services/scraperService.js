@@ -15,15 +15,23 @@ class ScraperService {
       console.log(`[ScraperService] Step 1: Launching Headless Browser...`);
 
       // 🔥 Detect environment
-      const isLocal = process.env.NODE_ENV !== "production";
+      const isProduction = process.env.NODE_ENV === "production";
 
-      // 🧠 Dynamic Chrome path
-      const executablePath = isLocal
-        ? getLocalChromePath()
-        : await chromium.executablePath;
+      // 🧠 Decide Chrome executable path
+      let executablePath;
+      if (isProduction) {
+        console.log("[ScraperService] Using @sparticuz/chromium in production (Render)...");
+        executablePath = await chromium.executablePath;
+      } else {
+        console.log("[ScraperService] Using local Chrome...");
+        executablePath = getLocalChromePath();
+      }
 
+      // 🧩 Debug log to confirm what Puppeteer will use
+      console.log(`[ScraperService] Resolved Chrome Path: ${executablePath}`);
+
+      // 🧠 Launch Puppeteer
       browser = await puppeteer.launch({
-        headless: true,
         executablePath,
         args: [
           ...chromium.args,
@@ -32,7 +40,9 @@ class ScraperService {
           "--disable-dev-shm-usage",
           "--single-process",
         ],
+        headless: isProduction ? chromium.headless : true,
         defaultViewport: chromium.defaultViewport,
+        ignoreHTTPSErrors: true,
       });
 
       const page = await browser.newPage();
@@ -41,7 +51,7 @@ class ScraperService {
       );
 
       console.log(`[ScraperService] Step 2: Fetching URL: ${url}`);
-      await page.goto(url, { waitUntil: "networkidle2" });
+      await page.goto(url, { waitUntil: "networkidle2", timeout: 30000 });
 
       console.log(`[ScraperService] Step 3: Page loaded. Waiting for selector 'div.rT__rtW'...`);
       await page.waitForSelector("div.rT__rtW", { timeout: 10000 });
@@ -54,16 +64,14 @@ class ScraperService {
       await new Promise((resolve) => setTimeout(resolve, 2000));
       console.log(`[ScraperService] Step 3c: Wait complete. Extracting data...`);
 
-      console.log(`[ScraperService] Step 4: Extracting data...`);
-
+      // 📊 Extract data
       const trends = await page.$$eval("div.rT__rtW", (blocks) => {
         const results = [];
         for (let i = 0; i < blocks.length && results.length < 10; i++) {
           const el = blocks[i];
 
           const localityName =
-            el.querySelector("div.rT__locSec a.section_header_semiBold")?.innerText.trim() ||
-            null;
+            el.querySelector("div.rT__locSec a.section_header_semiBold")?.innerText.trim() || null;
 
           const avgPriceText =
             el.querySelector("div.rT__w2 div.rT__shs")?.innerText.trim() || null;
