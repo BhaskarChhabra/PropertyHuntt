@@ -25,8 +25,6 @@ router.get(
   })
 );
 
-
-
 router.get("/me", getCurrentUser);
 
 // Step 2: Google redirects back after authentication
@@ -44,7 +42,7 @@ router.get(
         secure: process.env.NODE_ENV === "production",
         maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
       })
-      .redirect(`http://localhost:5173/?token=${token}`); // Redirect to frontend (React)
+      .redirect(`https://property-huntt-prvt.vercel.app/?token=${token}`); // <-- UPDATED: redirect to your production frontend!
   }
 );
 
