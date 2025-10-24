@@ -3,90 +3,102 @@ import jwt from "jsonwebtoken";
 import prisma from "../lib/prisma.js";
 
 export const register = async (req, res) => {
-  const { username, email, password } = req.body;
+  const { username, email, password } = req.body;
 
-  try {
-    // ✅ Check if user exists
-    const existingUser = await prisma.user.findFirst({
-      where: {
-        OR: [{ username }, { email }],
-      },
-    });
+  try {
+    // ✅ Check if user exists
+    const existingUser = await prisma.user.findFirst({
+      where: {
+        OR: [{ username }, { email }],
+      },
+    });
 
-    if (existingUser) {
-      return res.status(400).json({ message: "Username or email already exists" });
-    }
+    if (existingUser) {
+      return res.status(400).json({ message: "Username or email already exists" });
+    }
 
-    // ✅ Hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
+    // ✅ Hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-    // ✅ Create new user
-    const newUser = await prisma.user.create({
-      data: {
-        username,
-        email,
-        password: hashedPassword,
-      },
-    });
+    // ✅ Create new user
+    const newUser = await prisma.user.create({
+      data: {
+        username,
+        email,
+        password: hashedPassword,
+      },
+    });
 
-    res.status(201).json({ message: "User created successfully" });
-  } catch (err) {
-    console.error("Register Error:", err);
-    res.status(500).json({ message: "Failed to create user!" });
-  }
+    res.status(201).json({ message: "User created successfully" });
+  } catch (err) {
+    console.error("Register Error:", err);
+    res.status(500).json({ message: "Failed to create user!" });
+  }
 };
 
 export const login = async (req, res) => {
-  const { username, password } = req.body;
+  const { username, password } = req.body;
 
-  try {
-    // ✅ Check user
-    const user = await prisma.user.findUnique({
-      where: { username },
-    });
+  try {
+    // ✅ Check user
+    const user = await prisma.user.findUnique({
+      where: { username },
+    });
 
-    if (!user) return res.status(400).json({ message: "Invalid Credentials!" });
+    if (!user) return res.status(400).json({ message: "Invalid Credentials!" });
 
-    // ✅ Validate password
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid) return res.status(400).json({ message: "Invalid Credentials!" });
+    // ✅ Validate password
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) return res.status(400).json({ message: "Invalid Credentials!" });
 
-    // ✅ Generate token (7 days)
-    const token = jwt.sign(
-      { id: user.id, isAdmin: false },
-      process.env.JWT_SECRET || "default_secret", // fallback for dev
-      { expiresIn: "7d" }
-    );
+    // ✅ Generate token (7 days)
+    const token = jwt.sign(
+      { id: user.id, isAdmin: false },
+      process.env.JWT_SECRET || "default_secret", // fallback for dev
+      { expiresIn: "7d" }
+    );
 
-    const { password: _, ...userInfo } = user;
+    const { password: _, ...userInfo } = user;
 
-    // 🚨 FIX: Production environments (Render/Vercel) require secure: true and sameSite: "None"
-    //      for cross-domain cookie exchange. This resolves the 401 Unauthorized error.
-    res
-      .cookie("token", token, {
-        httpOnly: true,
-        // Render is always HTTPS, so we must set secure to true.
-        secure: true, 
-        // Allows cookies to be sent from Vercel to Render.
-        sameSite: "None", 
-        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-      })
-      .status(200)
-      .json(userInfo);
-  } catch (err) {
-    console.error("Login Error:", err);
-    res.status(500).json({ message: "Failed to login!" });
-  }
+    res
+      .cookie("token", token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      })
+      .status(200)
+      .json(userInfo);
+  } catch (err) {
+    console.error("Login Error:", err);
+    res.status(500).json({ message: "Failed to login!" });
+  }
 };
 
 export const logout = (req, res) => {
-  res
-    .clearCookie("token", {
-      httpOnly: true,
-      // 🚨 IMPORTANT: clearCookie ko bhi same options chahiye jo set karte waqt diye the.
-      secure: true, 
-      sameSite: "None", 
-    })
-    .status(200)
-    .json({ message: "Logout Successful" });
+  res
+    .clearCookie("token", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+    })
+    .status(200)
+    .json({ message: "Logout Successful" });
+};
+
+
+export const getCurrentUser = async (req, res) => {
+  try {
+    // Get JWT from cookie
+    const token = req.cookies.token;
+    if (!token) return res.status(401).json({ message: "Not authenticated" });
+
+    const payload = jwt.verify(token, process.env.JWT_SECRET || "default_secret");
+    const user = await prisma.user.findUnique({ where: { id: payload.id } });
+    if (!user) return res.status(404).json({ message: "User not found" });
+    const { password, ...userInfo } = user;
+    res.json(userInfo);
+  } catch (err) {
+    res.status(401).json({ message: "Invalid token" });
+  }
 };
