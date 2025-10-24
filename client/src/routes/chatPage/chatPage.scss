@@ -1,0 +1,15 @@
+// src/routes/chatPage/chatPage.scss
+
+// Using the peach background from your theme
+$bg-chat: #fef6f3;
+
+.chatPage {
+  height: 100%;
+  background-color: $bg-chat;
+  padding: 20px; // Adds a nice border around the chat UI
+
+  // This targets the .chat component from chat.scss
+  .chat {
+    height: 100%; // Makes the chat component fill this page
+  }
+}
