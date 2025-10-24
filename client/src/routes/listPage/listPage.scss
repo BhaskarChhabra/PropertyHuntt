@@ -2,8 +2,8 @@
 @use "sass:color";
 
 // --- Variables ---
-$brand-primary: #4F46E5; 
-$brand-secondary: color.adjust($brand-primary, $lightness: -10%); 
+$brand-primary: #4F46E5;
+$brand-secondary: color.adjust($brand-primary, $lightness: -10%);
 $text-dark: #111827; // Main heading color
 $text-light: #6B7280;
 $border-color: #E5E7EB;
@@ -16,45 +16,33 @@ $bg-card: #ffffff;
   width: 100%;
   max-width: 1400px;
   margin: 0 auto;
-  // Reduced top padding of the main container to let headerTextContainer handle it.
-  padding: 0 20px 20px 20px; 
+  padding: 0 20px 20px 20px;
   box-sizing: border-box;
   background-color: $bg-page;
 
-  // === Header Text Container (To match your image) ===
+  // === Header Text Container ===
   .headerTextContainer {
-    // Center the content
-    text-align: center; 
-    
-    // Add generous vertical space 
-    padding: 50px 20px 30px 20px; 
-    
+    text-align: center;
+    padding: 50px 20px 30px 20px;
+
     h1 {
-      // Style for 'Find Your Perfect Property'
-      font-size: 50px; // Increased size to match visual scale
-      font-weight: 800; // Extra Bold for impact
-      color: $text-dark; // Darkest color
-      margin: 0; 
+      font-size: 50px;
+      font-weight: 800;
+      color: $text-dark;
+      margin: 0;
     }
-
     p {
-      // Style for 'Discover a curated collection of premium properties'
-      font-size: 21px; 
-      color: $text-dark; 
-      opacity: 0.75; // Makes it slightly lighter than h1
-      margin: 10px auto 0 auto; // Center paragraph if width is restricted
-      max-width: 600px; // Optional: keeps subtitle from being too wide
+      font-size: 21px;
+      color: $text-dark;
+      opacity: 0.75;
+      margin: 10px auto 0 auto;
+      max-width: 600px;
     }
 
-    // Responsive adjustments
     @include sm {
       padding: 30px 10px 20px 10px;
-      h1 {
-        font-size: 32px;
-      }
-      p {
-        font-size: 16px;
-      }
+      h1 { font-size: 32px; }
+      p { font-size: 16px; }
     }
   }
   // ======================================
@@ -89,7 +77,7 @@ $bg-card: #ffffff;
     overflow: hidden;
     border: 1px solid $border-color;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
-    position: relative; 
+    position: relative;
 
     .map-searching-overlay {
       position: absolute;
@@ -97,16 +85,16 @@ $bg-card: #ffffff;
       left: 0;
       width: 100%;
       height: 100%;
-      background-color: rgba($bg-card, 0.7); 
+      background-color: rgba($bg-card, 0.7);
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 1.2rem;
       font-weight: 500;
       color: $text-dark;
-      z-index: 10; 
+      z-index: 10;
       backdrop-filter: blur(4px);
-      cursor: progress; 
+      cursor: progress;
     }
   }
 
@@ -114,20 +102,27 @@ $bg-card: #ffffff;
   .listContainer {
     width: 100%;
     display: grid;
-    gap: 30px; 
-    
-    grid-template-columns: repeat(2, 1fr); 
+    gap: 20px; // This is the gap BETWEEN cards
+    grid-template-columns: repeat(2, 1fr);
 
     @include md {
-      grid-template-columns: 1fr; 
+      grid-template-columns: 1fr;
     }
 
     h2 {
-      grid-column: 1 / -1; 
-      margin-bottom: 0; 
+      grid-column: 1 / -1;
+      margin-bottom: 0;
       font-size: 1.5rem;
       color: $text-dark;
     }
+
+    // --- 👇 YAHAN FIX ADD KIYA HAI ---
+    // Target the .card component rendered inside the grid
+    .card {
+      width: 100%; // Force card to fill its grid cell
+      max-width: none; // Override any max-width from card.scss
+    }
+    // --- 👆 END FIX ---
   }
 
   .noResults {
@@ -138,61 +133,46 @@ $bg-card: #ffffff;
     grid-column: 1 / -1;
 
     h2 {
-      font-size: 1.8rem; 
+      font-size: 1.8rem;
       color: $text-dark;
       margin-bottom: 10px;
     }
-
     p {
       color: $text-light;
-      font-size: 1rem; 
+      font-size: 1rem;
     }
   }
 
   /* --- Properties Loading Component Styles --- */
+  // ... (rest of the file is unchanged) ...
 
-// Keyframes animations ke liye
+// Keyframes
 @keyframes spin {
-  from {
-    transform: translate(-50%, -50%) rotate(0deg);
-  }
-  to {
-    transform: translate(-50%, -50%) rotate(360deg);
-  }
+  from { transform: translate(-50%, -50%) rotate(0deg); }
+  to { transform: translate(-50%, -50%) rotate(360deg); }
 }
-
 @keyframes orbit {
-  from {
-    transform: rotate(0deg) translateX(70px) rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg) translateX(70px) rotate(-360deg);
-  }
+  from { transform: rotate(0deg) translateX(70px) rotate(0deg); }
+  to { transform: rotate(360deg) translateX(70px) rotate(-360deg); }
 }
-
 @keyframes progress-indeterminate {
-  from {
-    left: -50%;
-  }
-  to {
-    left: 100%;
-  }
+  from { left: -50%; }
+  to { left: 100%; }
 }
 
 // Main container
 .propertiesLoadingContainer {
   width: 100%;
-  height: 100%; 
+  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: rgba($bg-card, 0.9); 
-  position: absolute; 
+  background-color: rgba($bg-card, 0.9);
+  position: absolute;
   top: 0;
   left: 0;
-  z-index: 100; 
+  z-index: 100;
 
-  // Wrapper jo content ko center me rakhta hai
   .loadingWrapper {
     display: flex;
     flex-direction: column;
@@ -200,50 +180,38 @@ $bg-card: #ffffff;
     gap: 16px;
     text-align: center;
     max-width: 400px;
-    padding: 30px; 
+    padding: 30px;
     background-color: $bg-card;
     border-radius: 16px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
 
-    // Icon (Main blue squircle + dot)
     .iconContainer {
       position: relative;
-      width: 140px; 
+      width: 140px;
       height: 140px;
       display: flex;
       align-items: center;
       justify-content: center;
 
-      // Blue "squircle"
       .loadingIcon {
         width: 100px;
         height: 100px;
         background: linear-gradient(145deg, $brand-primary, $brand-secondary);
-        border-radius: 28px; 
+        border-radius: 28px;
         display: flex;
         align-items: center;
         justify-content: center;
-        box-shadow: 0 10px 20px rgba(79, 70, 229, 0.3); 
-        
-        transform-origin: center center; 
-        animation: spin 3s linear infinite; 
+        box-shadow: 0 10px 20px rgba(79, 70, 229, 0.3);
+        transform-origin: center center;
+        animation: spin 3s linear infinite;
       }
 
-      // House icon (CSS se banaya gaya)
       .houseIcon {
-        position: absolute; 
+        position: absolute;
         width: 40px;
         height: 35px;
-        background: $bg-card; 
-        clip-path: polygon(
-          50% 0%, 
-          100% 30%, 
-          100% 100%, 
-          0 100%, 
-          0 30%
-        );
-
-        // Chota door
+        background: $bg-card;
+        clip-path: polygon(50% 0%, 100% 30%, 100% 100%, 0 100%, 0 30%);
         &::after {
           content: '';
           position: absolute;
@@ -258,7 +226,6 @@ $bg-card: #ffffff;
         }
       }
 
-      // Ghoomne wala dot
       .orbitingDot {
         width: 12px;
         height: 12px;
@@ -267,37 +234,33 @@ $bg-card: #ffffff;
         position: absolute;
         top: 50%;
         left: 50%;
-        margin: -6px; 
-        transform-origin: 0 0; 
-        animation: orbit 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite; 
+        margin: -6px;
+        transform-origin: 0 0;
+        animation: orbit 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
       }
     }
 
-    // Text styles
     h1 {
       font-size: 28px;
       font-weight: 700;
       color: $text-dark;
       margin: 0;
     }
-
     p {
       font-size: 16px;
       color: $text-light;
       margin: 0;
     }
-
     span {
       font-size: 14px;
       color: $brand-primary;
       font-weight: 500;
     }
 
-    // Loading bar
     .loadingBar {
       width: 100%;
       height: 8px;
-      background-color: color.adjust($brand-primary, $lightness: 40%); 
+      background-color: color.adjust($brand-primary, $lightness: 40%);
       border-radius: 4px;
       overflow: hidden;
       position: relative;
@@ -315,3 +278,4 @@ $bg-card: #ffffff;
   }
 }
 }
+
