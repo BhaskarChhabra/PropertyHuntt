@@ -25,7 +25,8 @@ $text-light: #6B7280;
 $border-color: #E5E7EB;
 
 .profilePage {
-  display: flex;
+  // ... (aapka pehle ka saara profilePage styles yahan rahega) ...
+   display: flex;
   flex-direction: column;
   height: 100%;
   background-color: $bg-page;
@@ -46,11 +47,10 @@ $border-color: #E5E7EB;
     }
 
     .wrapper {
-      // Use padding consistently on all sides for better spacing
-      padding: 30px; // 👈 *** CHANGED ***
+      padding: 30px;
       display: flex;
       flex-direction: column;
-      gap: 30px; // 👈 *** CHANGED: Increased gap for better separation ***
+      gap: 30px;
 
       @include lg {
         padding: 30px;
@@ -66,7 +66,7 @@ $border-color: #E5E7EB;
         display: flex;
         align-items: center;
         justify-content: space-between;
-        padding-top: 0; // 👈 *** CHANGED: Removed top padding here ***
+        padding-top: 0;
 
         h1 {
           font-weight: 600;
@@ -75,7 +75,7 @@ $border-color: #E5E7EB;
         }
 
         button {
-          padding: 10px 20px; // 👈 *** CHANGED: Slightly smaller button ***
+          padding: 10px 20px;
           cursor: pointer;
           border: none;
           border-radius: 8px;
@@ -95,9 +95,9 @@ $border-color: #E5E7EB;
       .info {
         display: flex;
         flex-direction: column;
-        gap: 15px; // 👈 *** CHANGED: Reduced gap inside info ***
+        gap: 15px;
         background-color: $bg-card;
-        padding: 25px; // 👈 *** CHANGED: Adjusted padding ***
+        padding: 25px;
         border-radius: 12px;
         border: 1px solid $border-color;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
@@ -105,8 +105,8 @@ $border-color: #E5E7EB;
         span {
           display: flex;
           align-items: center;
-          gap: 15px; // 👈 *** CHANGED: Reduced gap ***
-          font-size: 1rem; // 👈 *** CHANGED: Slightly smaller font ***
+          gap: 15px;
+          font-size: 1rem;
           color: $text-light;
 
           b {
@@ -116,33 +116,31 @@ $border-color: #E5E7EB;
         }
 
         img {
-          width: 60px; // 👈 *** CHANGED: Smaller avatar ***
+          width: 60px;
           height: 60px;
           border-radius: 50%;
           object-fit: cover;
-          border: 3px solid $bg-accent-light; // 👈 *** CHANGED: Thinner border ***
+          border: 3px solid $bg-accent-light;
         }
 
-        // --- 👇 LOGOUT BUTTON FIX ---
-        button {
-          width: auto; // 👈 *** CHANGED: Don't force full width ***
-          align-self: flex-start; // 👈 *** ADDED: Align to left ***
+        button { // Logout Button
+          width: auto;
+          align-self: flex-start;
           background-color: $brand-danger;
           border: none;
           color: white;
-          padding: 8px 16px; // 👈 *** CHANGED: Smaller padding ***
+          padding: 8px 16px;
           cursor: pointer;
-          border-radius: 6px; // 👈 *** CHANGED: Smaller radius ***
-          font-weight: 500; // 👈 *** CHANGED: Normal weight ***
-          font-size: 0.9rem; // 👈 *** CHANGED: Smaller font ***
-          margin-top: 10px; // 👈 *** CHANGED: Reduced margin ***
+          border-radius: 6px;
+          font-weight: 500;
+          font-size: 0.9rem;
+          margin-top: 10px;
           transition: all 0.2s ease;
 
           &:hover {
             background-color: $brand-danger-dark;
           }
         }
-        // --- 👆 END LOGOUT FIX ---
       }
 
       // --- HORIZONTAL LIST STYLE ---
@@ -153,14 +151,49 @@ $border-color: #E5E7EB;
         gap: 20px;
         padding: 10px 0 20px 0;
 
-        // --- Card Override ---
-        > * {
+        // --- Card Override for Profile Page ---
+        > * { // Targets the .card component directly inside .list
           flex: 0 0 300px;
           max-height: 400px;
           height: 400px;
 
           .imageContainer {
             height: 220px;
+            position: relative; // Needed for absolute positioning of icons
+
+            // --- DELETE ICON STYLES ---
+            .deleteIcon {
+              position: absolute;
+              top: 10px;
+              right: 50px; // Position next to share icon
+              background-color: rgba(255, 0, 0, 0.7); // Red background
+              color: white; // White icon
+              border: none;
+              border-radius: 50%;
+              width: 32px;
+              height: 32px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              cursor: pointer;
+              z-index: 2;
+              box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+              transition: all 0.25s ease;
+
+              svg {
+                 display: block;
+              }
+
+              &:hover {
+                background-color: rgba(200, 0, 0, 0.9);
+                transform: scale(1.1);
+              }
+            }
+             // --- END DELETE ICON STYLES ---
+
+             .shareIcon {
+                 // Adjust if needed based on deleteIcon position
+             }
           }
 
           .textContainer {
@@ -171,9 +204,7 @@ $border-color: #E5E7EB;
             flex-direction: column;
             position: relative;
 
-            .address {
-              font-size: 13px;
-            }
+            .address { font-size: 13px; }
 
             .title {
               font-size: 17px;
@@ -183,15 +214,8 @@ $border-color: #E5E7EB;
               text-overflow: ellipsis;
             }
 
-            .priceLabel {
-              font-size: 11px;
-              margin: 0;
-            }
-
-            .price {
-              font-size: 20px;
-              margin: 0;
-            }
+            .priceLabel { font-size: 11px; margin: 0; }
+            .price { font-size: 20px; margin: 0; }
 
             .features {
               gap: 8px;
@@ -199,13 +223,9 @@ $border-color: #E5E7EB;
               padding-bottom: 0;
               margin-top: auto;
               padding-right: 60px; // Space for icons
-
-              .feature {
-                padding: 6px 10px;
-              }
+              .feature { padding: 6px 10px; }
             }
 
-            // --- Buttons Override ---
             .bottom {
               position: absolute;
               bottom: 10px;
@@ -221,62 +241,89 @@ $border-color: #E5E7EB;
                 .contact-btn,
                 .save-btn {
                   flex: 0 0 auto;
-                  background: none;
-                  border: none;
-                  padding: 4px;
-                  font-size: 0;
-                  color: transparent;
-                  cursor: pointer; // Ensure cursor changes
-
-                  img {
-                    width: 20px;
-                    height: 20px;
-                  }
-
-                  &:hover {
-                    background: none;
-                    border: none;
-                    transform: scale(1.1);
-                  }
+                  background: none; border: none; padding: 4px;
+                  font-size: 0; color: transparent; cursor: pointer;
+                  img { width: 20px; height: 20px; display: block; }
+                  &:hover { background: none; border: none; transform: scale(1.1); }
                 }
 
                 .save-btn {
                   &.saved {
-                    background: none;
-                    border: none;
-
-                    img {
-                      filter: invert(33%) sepia(98%) saturate(2811%)
-                        hue-rotate(227deg) brightness(97%) contrast(97%);
-                    }
+                    background: none; border: none;
+                    img { filter: invert(33%) sepia(98%) saturate(2811%) hue-rotate(227deg) brightness(97%) contrast(97%); }
                   }
                 }
               }
             }
           }
+        } // End Card Override
+      } // End .list
+    } // End .wrapper
+  } // End .details
+
+  // Chat Container (No Changes)
+  .chatContainer { /* ... */ }
+
+  // --- 👇 ADDED: Modal Styles ---
+  .modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.6); // Darker overlay
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000; // Ensure it's above everything
+    backdrop-filter: blur(3px); // Optional: Blur background
+  }
+
+  .modalContent {
+    background: $bg-card; // White background from variables
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+    width: 90%;
+    max-width: 450px; // Limit width
+    text-align: center;
+
+    p {
+      font-size: 1.1rem;
+      color: $text-dark; // Use text dark variable
+      margin-bottom: 25px;
+      line-height: 1.5;
+    }
+
+    .modalActions {
+      display: flex;
+      justify-content: center; // Center buttons
+      gap: 15px; // Space between buttons
+
+      button {
+        padding: 10px 25px;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+
+        &.confirmButton {
+          background-color: $brand-danger; // Red variable for confirm
+          color: white;
+          &:hover { background-color: $brand-danger-dark; } // Darker red variable
+        }
+
+        &.cancelButton {
+          background-color: $border-color; // Border color for cancel bg
+          color: $text-dark; // Dark text variable
+          &:hover { background-color: darken($border-color, 10%); } // Darken border color on hover
         }
       }
     }
   }
+  // --- 👆 END Modal Styles ---
 
-  .chatContainer {
-    flex: 1;
-    background-color: $bg-chat;
-    height: 100%;
-    border-left: none;
-    border-top: 1px solid $border-color;
-
-    @include md {
-      flex: 1;
-      height: auto;
-      border-left: none;
-      border-top: 1px solid $border-color;
-    }
-
-    .wrapper {
-      padding: 0;
-      height: 100%;
-    }
-  }
-}
+} // End .profilePage
 
