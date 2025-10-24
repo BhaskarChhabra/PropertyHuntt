@@ -13,11 +13,21 @@ export const listPageLoader = async ({ request, params }) => {
   });
 };
 
+// --- 👇 HERE ARE THE CHANGES ---
+
+// 1. MODIFIED: This loader now ONLY gets posts.
 export const profilePageLoader = async () => {
   const postPromise = apiRequest("/users/profilePosts");
-  const chatPromise = apiRequest("/chats");
   return defer({
     postResponse: postPromise,
-    chatResponse: chatPromise,
+    // chatResponse has been removed
+  });
+};
+
+// 2. NEW: This loader is just for the chat page.
+export const chatPageLoader = async () => {
+  const chatPromise = apiRequest("/chats");
+  return defer({
+    chatResponse: chatPromise, // The chatPromise lives here now
   });
 };
