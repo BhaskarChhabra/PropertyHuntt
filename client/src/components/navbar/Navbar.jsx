@@ -7,10 +7,10 @@ import { useNotificationStore } from "../../lib/notificationStore";
 // Importing icons for the menu to match the look
 import { IoIosSettings } from "react-icons/io";
 import { FaRegUser } from "react-icons/fa";
-import { IoHeartOutline } from "react-icons/io5";
+// 👇 --- 1. IMPORTED THE NEW ICON ---
+import { IoHeartOutline, IoPaperPlaneOutline } from "react-icons/io5";
 import { IoMdLogOut } from "react-icons/io";
 import { HiOutlineChevronDown, HiOutlineChevronUp } from "react-icons/hi2";
-
 
 function Navbar() {
   const [open, setOpen] = useState(false);
@@ -41,7 +41,7 @@ function Navbar() {
       {/* 1. LEFT SECTION (LOGO) */}
       <div className="left">
         <NavLink to="/" className="logo">
-          <div className="logo-icon-wrap">🏠</div> 
+          <div className="logo-icon-wrap">🏠</div>
           <div className="logo-text-wrap">
             <span>BuildEstate</span>
             <span className="premiumProperties">Premium Properties</span>
@@ -51,16 +51,29 @@ function Navbar() {
 
       {/* 2. CENTER SECTION (NAV LINKS) */}
       <div className="center">
-        <NavLink to="/" end className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+        <NavLink
+          to="/"
+          end
+          className={({ isActive }) => (isActive ? "nav-link active" : "nav-link")}
+        >
           Home
         </NavLink>
-        <NavLink to={propertiesSearchUrl} className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+        <NavLink
+          to={propertiesSearchUrl}
+          className={({ isActive }) => (isActive ? "nav-link active" : "nav-link")}
+        >
           Properties
         </NavLink>
-        <NavLink to="/about" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+        <NavLink
+          to="/about"
+          className={({ isActive }) => (isActive ? "nav-link active" : "nav-link")}
+        >
           About Us
         </NavLink>
-        <NavLink to="/contact" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+        <NavLink
+          to="/contact"
+          className={({ isActive }) => (isActive ? "nav-link active" : "nav-link")}
+        >
           Contact
         </NavLink>
       </div>
@@ -76,27 +89,36 @@ function Navbar() {
         {currentUser ? (
           <div className="userActions">
             
-            {/* Notification Bell */}
-            <div className="notificationBell">
-              <span className="bellIcon">🔔</span>
+            {/* 👇 --- 2. REPLACED BELL WITH CHAT ICON LINK --- */}
+            {/* Chat/Messages Icon */}
+            <NavLink to="/chat" className="notificationBell">
+              <span className="bellIcon">
+                {/* Using IoPaperPlaneOutline icon */}
+                <IoPaperPlaneOutline size={24} /> 
+              </span>
               {number > 0 && <div className="notificationCount">{number}</div>}
-            </div>
+            </NavLink>
+            {/* 👆 --- END OF CHANGE --- */}
 
             {/* User Avatar/Dropdown Trigger (EXACT PILL SHAPE) */}
-            <div 
-              className={`userPill ${isUserMenuOpen ? 'open' : ''}`}
+            <div
+              className={`userPill ${isUserMenuOpen ? "open" : ""}`}
               onClick={() => setIsUserMenuOpen((prev) => !prev)}
             >
               {/* Avatar Placeholder/Image */}
               <div className="avatarPlaceholder">{userInitials}</div>
-              
+
               <div className="userNameAndMember">
-                  <span className="username">{userName}</span>
-                  <span className="premiumMemberTag">Premium Member</span>
+                <span className="username">{userName}</span>
+                <span className="premiumMemberTag">Premium Member</span>
               </div>
-              
+
               <span className="dropdownArrow">
-                {isUserMenuOpen ? <HiOutlineChevronUp size={20} /> : <HiOutlineChevronDown size={20} />}
+                {isUserMenuOpen ? (
+                  <HiOutlineChevronUp size={20} />
+                ) : (
+                  <HiOutlineChevronDown size={20} />
+                )}
               </span>
             </div>
 
@@ -111,7 +133,7 @@ function Navbar() {
                     <span className="premiumTag">👑 Premium</span>
                   </div>
                 </div>
-                
+
                 {/* Menu Items */}
                 <NavLink to="/profile" className="menuItem">
                   <FaRegUser size={18} /> My Profile
@@ -122,7 +144,7 @@ function Navbar() {
                 <NavLink to="/settings" className="menuItem">
                   <IoIosSettings size={18} /> Settings
                 </NavLink>
-                
+
                 <NavLink to="/logout" className="signOut menuItem">
                   <IoMdLogOut size={18} /> Sign out
                 </NavLink>
@@ -132,8 +154,12 @@ function Navbar() {
         ) : (
           <>
             {/* Login/Register links */}
-            <NavLink to="/login" className="loginLink">Sign in</NavLink>
-            <NavLink to="/register" className="registerLink">Sign up</NavLink>
+            <NavLink to="/login" className="loginLink">
+              Sign in
+            </NavLink>
+            <NavLink to="/register" className="registerLink">
+              Sign up
+            </NavLink>
           </>
         )}
 
