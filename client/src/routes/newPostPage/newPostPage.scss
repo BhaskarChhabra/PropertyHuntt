@@ -8,6 +8,7 @@ $text-light: #6b7280;
 $border-color: #e5e7eb;
 $bg-page: #f9fafb; // Light grey page background
 $bg-card: #ffffff; // White for cards/panels
+$brand-danger: #EF4444; // For delete button
 
 // --- ANIMATIONS ---
 @keyframes slideUpFadeIn {
@@ -28,31 +29,42 @@ $bg-card: #ffffff; // White for cards/panels
   gap: 20px;
   background-color: $bg-page;
 
+  // --- 👇 MOBILE LAYOUT FIX ---
+  @include md {
+    flex-direction: column;
+    height: auto; // Allow content to flow
+  }
+  // --- 👆 END FIX ---
+
   // --- FORM CONTAINER (LEFT SIDE) ---
   .formContainer {
     flex: 3;
     overflow-y: auto; // Allow only this container to scroll
     padding-right: 20px;
+    height: calc(100vh - 40px); // Full height minus margin
+    margin: 20px 0 20px 20px; // Add margin
+
+    // --- 👇 MOBILE LAYOUT FIX ---
+    @include md {
+      flex: 1; // Take full width
+      padding-right: 0;
+      height: auto; // Let content define height
+      overflow-y: visible;
+      margin: 20px; // Adjust margin for mobile
+    }
+    // --- 👆 END FIX ---
+
 
     // --- CUSTOM SCROLLBAR ---
-    &::-webkit-scrollbar {
-      width: 8px;
-    }
-    &::-webkit-scrollbar-track {
-      background: #f1f1f1;
-      border-radius: 10px;
-    }
-    &::-webkit-scrollbar-thumb {
-      background: #d1d5db;
-      border-radius: 10px;
-    }
-    &::-webkit-scrollbar-thumb:hover {
-      background: #a8b0bc;
-    }
+    &::-webkit-scrollbar { width: 8px; }
+    &::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
+    &::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 10px; }
+    &::-webkit-scrollbar-thumb:hover { background: #a8b0bc; }
 
 
     .wrapper {
-      margin: 20px 0;
+      // margin: 20px 0; // Removed, margin is on formContainer now
+      padding-bottom: 40px; // Add padding at the bottom
 
       .headerWithButton {
         display: flex;
@@ -82,10 +94,8 @@ $bg-card: #ffffff; // White for cards/panels
           box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
           transition: transform 0.3s ease, box-shadow 0.3s ease;
           
-          // --- Entrance Animation ---
           opacity: 0;
           animation: slideUpFadeIn 0.5s ease-out forwards;
-          // Note: Add style={{animationDelay: '0.Xs'}} in JSX for staggered effect
           
           &:hover {
             transform: translateY(-4px);
@@ -102,7 +112,6 @@ $bg-card: #ffffff; // White for cards/panels
             padding-bottom: 15px;
             position: relative;
 
-            // --- Accent line ---
             &::after {
               content: '';
               position: absolute;
@@ -126,6 +135,59 @@ $bg-card: #ffffff; // White for cards/panels
               grid-template-columns: 1fr; // 1 column on small screens
             }
           }
+
+          // --- 👇 STYLES FOR UPLOADED IMAGES ---
+          .imageContainer { // RENAMED from .imagePreviewContainer
+            display: grid;
+            // Responsive grid: 4 columns, shrinking to 3 or 2
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+          
+            // Styles apply directly to the image tag inside .imageContainer
+            img { // RENAMED from .imagePreview
+              width: 100%;
+              height: 100px; // Fixed height
+              object-fit: cover; // This crops the image to fit
+              border-radius: 8px;
+              border: 1px solid $border-color;
+              box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+              position: relative; // For the delete button to be positioned relative to this
+            }
+            
+            // This item wrapper is still useful for positioning the delete button
+            .imagePreviewItem {
+              position: relative; 
+            }
+            
+            .deleteImageBtn {
+                position: absolute;
+                top: 5px;
+                right: 5px;
+                background-color: rgba($brand-danger, 0.8);
+                color: white;
+                border: none;
+                border-radius: 50%;
+                width: 24px;
+                height: 24px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                cursor: pointer;
+                font-size: 14px;
+                font-weight: bold;
+                line-height: 1;
+                padding: 0;
+                box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+                transition: all 0.2s ease;
+                
+                &:hover {
+                   background-color: $brand-danger;
+                   transform: scale(1.1);
+                }
+            }
+          }
+          // --- 👆 END IMAGE PREVIEW STYLES ---
         }
 
         // --- MODERN FORM ITEM STYLING ---
@@ -135,7 +197,6 @@ $bg-card: #ffffff; // White for cards/panels
           gap: 8px;
           position: relative;
           
-          // --- Interactive Label Highlight ---
           &:focus-within label {
             color: $brand-primary;
           }
@@ -171,7 +232,7 @@ $bg-card: #ffffff; // White for cards/panels
           &.half-width {
              grid-column: span 2; // Take 2/3 width on large screens
              @include md {
-                grid-column: 1 / -1; // Full width on medium
+               grid-column: 1 / -1; // Full width on medium
              }
           }
         }
@@ -181,6 +242,7 @@ $bg-card: #ffffff; // White for cards/panels
             .quill > .ql-container {
                 border-radius: 0 0 8px 8px;
                 border-color: $border-color;
+                font-size: 1rem; // Match other inputs
             }
             .quill > .ql-toolbar{
                 border-radius: 8px 8px 0 0;
@@ -208,7 +270,14 @@ $bg-card: #ffffff; // White for cards/panels
             color: white;
             grid-column: 1 / -1; // Full width
 
-            &:hover {
+            &:disabled {
+                 background: #aab0bc;
+                 cursor: not-allowed;
+                 box-shadow: none;
+                 transform: none;
+            }
+            
+            &:hover:not(:disabled) {
                 background-image: linear-gradient(to right, #4338ca 0%, #5a52d4 100%);
                 transform: translateY(-2px);
                 box-shadow: 0 4px 10px rgba(79, 70, 229, 0.25);
@@ -233,7 +302,7 @@ $bg-card: #ffffff; // White for cards/panels
   .sideContainer {
     flex: 2;
     height: calc(100vh - 40px); // Fill the height
-    margin: 20px 0;
+    margin: 20px 20px 20px 0; // Adjust margin
     position: sticky; // <-- THE MAGIC!
     top: 20px;
     
@@ -242,13 +311,25 @@ $bg-card: #ffffff; // White for cards/panels
     border: 1px solid $border-color;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
     transition: box-shadow 0.3s ease;
+    overflow: hidden; // Ensure map corners are rounded
+
+    // --- 👇 MOBILE LAYOUT FIX ---
+    @include md {
+       display: none; // Hide map container on mobile
+    }
+    // --- 👆 END FIX ---
     
     &:hover {
         box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
     }
 
     // Make your map component fill this container
-    // For example: .map { width: 100%; height: 100%; border-radius: 12px; }
+    // Example: .map { width: 100%; height: 100%; }
+    // Ensure your map component (e.g., .newPostMap) fills this
+    & > * {
+       width: 100%;
+       height: 100%;
+    }
   }
 }
 
