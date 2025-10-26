@@ -158,9 +158,48 @@ $border-color: #E5E7EB; // Standard border
                 // 💡============ END: UPDATED PRICE BLOCK ============💡
 
                 .address {
-                    display: flex;
-                    align-items: center;
-                    gap: 8px;
+                   display: flex;
+    align-items: center;
+    flex-wrap: wrap; 
+    gap: 8px 12px;  // Text aur button ke beech space
+
+    .get-directions-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        
+        // Shape & Size
+        padding: 6px 14px;
+        border-radius: 999px; // Pill shape
+        
+        // Colors
+        background-color: #f3f4f6;  // Light gray background (Tailwind gray-100)
+        border: 1px solid #e5e7eb;  // Light gray border (Tailwind gray-200)
+        color: #374151;             // Dark gray text (Tailwind gray-700)
+
+        // Text
+        font-size: 13px;
+        font-weight: 500;
+        text-decoration: none;
+
+        // Interaction
+        cursor: pointer;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); // Smooth transition
+
+        &:hover {
+            background-color: #ffffff; // White on hover
+            border-color: #6b7280;     // Darker border on hover
+            color: #111827;            // Darker text on hover
+            transform: translateY(-2px); // "Lift" effect
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); // Soft shadow
+        }
+
+        &:active {
+            transform: translateY(0); // Press down effect
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+    }
+
                     img {
                         width: 18px;
                         height: 18px;
