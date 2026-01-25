@@ -8,7 +8,27 @@ import Login from "./routes/login/login";
 import Register from "./routes/register/register";
 import ProfileUpdatePage from "./routes/profileUpdatePage/profileUpdatePage";
 import NewPostPage from "./routes/newPostPage/newPostPage";
-import { listPageLoader, profilePageLoader, singlePageLoader } from "./lib/loaders";
+import AIPropertyHub from "./routes/aiPropertyHub/AIPropertyHub"; // new page
+import InvestmentPage from "./routes/investmentPage/InvestmentPage"; // fixed casing
+
+// 👇 --- 1. IMPORT YOUR NEW PAGE ---
+import ChatPage from "./routes/chatPage/ChatPage";
+
+// 👇 --- 2. IMPORT YOUR NEW LOADER ---
+import {
+  listPageLoader,
+  profilePageLoader,
+  singlePageLoader,
+  chatPageLoader, // Added this
+} from "./lib/loaders";
+
+import { GoogleOAuthProvider } from "@react-oauth/google"; // <--- THE REAL IMPORT
+
+// !!! IMPORTANT: Replace this with your actual Google Client ID from the Google Cloud Console !!!
+// In a real project, this should be loaded from your environment variables:
+// const GOOGLE_CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID;
+const GOOGLE_CLIENT_ID =
+  "73037730787-5clbbd0634me9hsqfuj12f79429tq20j.apps.googleusercontent.com";
 
 function App() {
   const router = createBrowserRouter([
@@ -30,7 +50,6 @@ function App() {
           element: <SinglePage />,
           loader: singlePageLoader,
         },
-
         {
           path: "/login",
           element: <Login />,
@@ -38,6 +57,15 @@ function App() {
         {
           path: "/register",
           element: <Register />,
+        },
+        // Public AI pages
+        {
+          path: "/ai-property-hub",
+          element: <AIPropertyHub />,
+        },
+        {
+          path: "/investment-insights",
+          element: <InvestmentPage />,
         },
       ],
     },
@@ -48,8 +76,17 @@ function App() {
         {
           path: "/profile",
           element: <ProfilePage />,
-          loader: profilePageLoader
+          loader: profilePageLoader, // This is now the modified loader
         },
+
+        // 👇 --- 3. ADDED THE NEW CHAT ROUTE ---
+        {
+          path: "/chat",
+          element: <ChatPage />,
+          loader: chatPageLoader,
+        },
+        // 👆 --- END OF NEW ROUTE ---
+
         {
           path: "/profile/update",
           element: <ProfileUpdatePage />,
@@ -62,7 +99,13 @@ function App() {
     },
   ]);
 
-  return <RouterProvider router={router} />;
+  return (
+    // We wrap the RouterProvider with the GoogleOAuthProvider so that
+    // the Google context is available everywhere in your application.
+    <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+      <RouterProvider router={router} />
+    </GoogleOAuthProvider>
+  );
 }
 
 export default App;

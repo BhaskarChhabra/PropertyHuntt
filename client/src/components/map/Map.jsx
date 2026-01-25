@@ -1,93 +1,138 @@
-import { useEffect, useState } from "react";
-import { MapContainer, TileLayer, useMap } from "react-leaflet";
-import "leaflet/dist/leaflet.css";
-import Pin from "../pin/Pin";
+import React, { useEffect, useRef, useState } from "react";
+// --- [BADLAV] useJsApiLoader yahan se hata diya gaya hai ---
+import { GoogleMap, Marker, InfoWindow } from "@react-google-maps/api";
+// axios import ki zaroorat nahi lag rahi, hata raha hoon
+// import axios from 'axios'; 
 
-// FitBounds component: adjusts view based on items
-function FitBounds({ items }) {
-  const map = useMap();
+// --- [BADLAV] Ye constants ab ListPage.js mein hain ---
+// const GOOGLE_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+// const LIBRARIES = ["places"];
 
-  useEffect(() => {
-    if (items.length > 1) {
-      const bounds = items.map(item => [
-        parseFloat(item.latitude),
-        parseFloat(item.longitude),
-      ]);
-      map.fitBounds(bounds, { maxZoom: 12 }); // Fit all points, prevent over zoom
-    } else if (items.length === 1) {
-      const lat = parseFloat(items[0].latitude);
-      const lon = parseFloat(items[0].longitude);
-      map.setView([lat, lon], 15); // Zoom for a single point
+// Constants
+const MAP_CONTAINER_STYLE = { width: "100%", height: "100%" };
+const DEFAULT_CENTER = { lat: 28.61, lng: 77.21 };
+const WORLD_ZOOM = 3;
+
+
+// --- [BADLAV] Props mein 'isLoaded' aur 'loadError' add karein ---
+function Map({ items, selectedItem, centerLat, centerLng, onMapClick, onSearchArea, isLoaded, loadError }) {
+    
+    const mapRef = useRef(null);
+    const [showSearchButton, setShowSearchButton] = useState(false);
+
+    // --- [DEBUG] Console logs add kiye gaye ---
+    console.log("--- Map Component Render ---");
+    console.log("isLoaded Prop:", isLoaded);
+    console.log("loadError Prop:", loadError);
+    console.log("Items Prop:", items);
+    console.log("SelectedItem Prop:", selectedItem);
+
+    // --- [BADLAV] useJsApiLoader hook yahan se hata diya gaya hai ---
+    // const { isLoaded, loadError } = useJsApiLoader({ ... });
+
+    const onMapLoad = React.useCallback(map => {
+        mapRef.current = map;
+        console.log("Map Loaded (onMapLoad triggered)");
+
+        if (items && items.length > 0 && !selectedItem) {
+            console.log("Fitting bounds for items...");
+            const bounds = new window.google.maps.LatLngBounds();
+            items.forEach(item => {
+                const lat = parseFloat(item.latitude);
+                const lng = parseFloat(item.longitude);
+                if (!isNaN(lat) && !isNaN(lng)) {
+                    bounds.extend({ lat, lng });
+                }
+            });
+            if (bounds.getCenter()) {
+                map.fitBounds(bounds);
+            }
+        }
+    }, [items, selectedItem]);
+
+    useEffect(() => {
+        if (selectedItem && mapRef.current) {
+            console.log("Panning to selected item:", selectedItem.id);
+            const lat = parseFloat(selectedItem.latitude);
+            const lng = parseFloat(selectedItem.longitude);
+            if (!isNaN(lat) && !isNaN(lng)) {
+                const position = { lat, lng };
+                mapRef.current.panTo(position);
+                mapRef.current.setZoom(15);
+            }
+        }
+    }, [selectedItem]);
+
+    // Ye checks ab props par kaam karenge
+    if (loadError) {
+        console.error("Map Load Error:", loadError);
+        return <div>Map loading error.</div>;
     }
-  }, [items, map]);
+    if (!isLoaded) {
+        console.warn("Map is NOT loaded yet.");
+        return <div>Loading Map...</div>;
+    }
 
-  return null;
+    console.log("Map is loaded, rendering GoogleMap component...");
+
+    return (
+        <>
+            {showSearchButton && (
+                <button
+                    className="search-area-btn"
+                    // ... (button logic waisa hi rahega) ...
+                >
+                    Search This Area
+                </button>
+            )}
+
+            <GoogleMap
+                mapContainerStyle={MAP_CONTAINER_STYLE}
+                center={{ lat: centerLat, lng: centerLng }}
+                zoom={ (items && items.length > 0) ? 12 : WORLD_ZOOM}
+                onLoad={onMapLoad}
+                options={{ scrollwheel: true, streetViewControl: false, mapTypeControl: false }}
+                onClick={(e) => onMapClick && onMapClick(e.latLng.lat(), e.latLng.lng())}
+                onDragEnd={() => setShowSearchButton(true)}
+                onZoomChanged={() => setShowSearchButton(true)}
+            >
+                {/* --- [DEBUG] Items loop ke liye log --- */}
+                {items && items.length > 0 ? (
+                    items.map((item) => {
+                        const isSelected = item.id === selectedItem?.id;
+                        const position = { 
+                            lat: parseFloat(item.latitude), 
+                            lng: parseFloat(item.longitude) 
+                        };
+                        
+                        if (isNaN(position.lat) || isNaN(position.lng)) {
+                            console.warn("Skipping item with invalid coordinates:", item);
+                            return null; 
+                        }
+
+                        // console.log(`Rendering Marker for item ${item.id} at`, position); // (Optional: bohot saare logs aa sakte hain)
+
+                        return (
+                            <Marker 
+                                key={item.id} 
+                                position={position} 
+                                // icon prop use nahi kar rahe (default pin)
+                            >
+                                {isSelected && (
+                                    <InfoWindow position={position}>
+                                        <div><strong>{item.title}</strong></div>
+                                    </InfoWindow>
+                                )}
+                            </Marker>
+                        );
+                    })
+                ) : (
+                    // --- [DEBUG] Agar items nahi hain ---
+                    console.log("No items to display on map.")
+                )}
+            </GoogleMap>
+        </>
+    );
 }
 
-// ResetViewOnEmpty component: resets view when no items
-function ResetViewOnEmpty({ items, center, zoom }) {
-  const map = useMap();
-
-  useEffect(() => {
-    if (items.length === 0) {
-      map.setView(center, zoom);
-    }
-  }, [items, center, zoom, map]);
-
-  return null;
-}
-
-// Main Map component
-function Map({ items, city, address }) {
-  const [center, setCenter] = useState([30, 70]); // Default world center
-  const [zoom, setZoom] = useState(1); // Default world zoom
-
-  // Fetch coordinates if no items and city/address is provided
-  useEffect(() => {
-    if (items.length === 0 && (city || address)) {
-      const query = `${address ? address + ' ' : ''}${city ? city : ''}`.trim();
-
-      fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json`, {
-        headers: {
-          "User-Agent": "your-app-name",
-          "Accept-Language": "en",
-        },
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          if (data.length > 0) {
-            setCenter([parseFloat(data[0].lat), parseFloat(data[0].lon)]);
-            setZoom(10);
-          }
-        })
-        .catch(() => {
-          setCenter([30, 70]); // Fallback on error
-          setZoom(1);
-        });
-    }
-  }, [city, address, items]);
-
-  return (
-    <MapContainer
-      center={center}
-      zoom={zoom}
-      scrollWheelZoom={false}
-      className="map"
-      style={{ height: "400px", width: "100%" }}
-    >
-      <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-      />
-
-      {items.map((item) => (
-        <Pin item={item} key={item.id} />
-      ))}
-
-      {items.length > 0 && <FitBounds items={items} />}
-      {items.length === 0 && <ResetViewOnEmpty items={items} center={center} zoom={zoom} />}
-    </MapContainer>
-  );
-}
-
-export default Map;
+export default React.memo(Map);

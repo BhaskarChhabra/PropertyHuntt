@@ -1,38 +1,41 @@
-import { useContext } from "react";
-import SearchBar from "../../components/searchBar/SearchBar";
+import React from "react";
 import "./homePage.scss";
-import { AuthContext } from "../../context/AuthContext";
 
+// --- CORRECTED IMPORT PATHS ---
+// Path changed from ../ to ../../ to correctly navigate from src/routes/homePage/ to src/
+import HeroSection from "../../components/HeroSection/HeroSection";
+import StatsSection from "../../components/StatsSection/StatsSection";
+//import FeaturedProperties from "../../components/FeaturedProperties/FeaturedProperties";
+import HowItWorks from "../../components/HowItWorks/HowItWorks";
+import FeaturesSection from "../../components/FeaturesSection/FeaturesSection";
+import HighlightsSection from "../../components/HighlightsSection/HighlightsSection";
 function HomePage() {
-  const { currentUser } = useContext(AuthContext);
-
   return (
     <div className="homePage">
       <div className="textContainer">
         <div className="wrapper">
-          <h1 className="title">Find Property, Hostel & Get Your Dream Place</h1>
-       <p>
-  Welcome to <span style={{ fontWeight: "bold", color: "#2c3e50" }}>PropertyHuntt</span>, your go-to destination for finding the perfect place — be it a <span style={{ color: "#3498db" }}>cozy hostel</span>, <span style={{ color: "#e74c3c" }}>dream home</span>, or a <span style={{ color: "#f39c12" }}>budget-friendly rental</span>. From <span style={{ color: "#1abc9c" }}>vibrant city life</span> to a <span style={{ color: "#9b59b6" }}>serene retreat</span>, we’ve got you covered. Start your journey today and find the place you’ll love to call home.
-</p>
-          <SearchBar />
-          <div className="boxes">
-            <div className="box">
-              <h1>1</h1>
-              <h2>Year of Experience</h2>
-            </div>
-            <div className="box">
-              <h1>5</h1>
-              <h2>Award Gained</h2>
-            </div>
-            <div className="box">
-              <h1>500+</h1>
-              <h2>Property Ready</h2>
-            </div>
-          </div>
+          
+          {/* 1. Hero Section */}
+          <HeroSection />
+          <HighlightsSection />
+          {/* 2. Stats Section */}
+          <StatsSection />
+
+          {/* 3. Featured Properties (This component fetches its own data) */}
+          {/* <FeaturedProperties /> */}
+
+          {/* 4. How It Works */}
+          <HowItWorks />
+
+          {/* 5. Features/Excellence Section */}
+          <FeaturesSection />
+
         </div>
       </div>
+
+      {/* This is hidden via SCSS */}
       <div className="imgContainer">
-        <img src="/bg.png" alt="" />
+        <img src="/bg.png" alt="Modern property background" />
       </div>
     </div>
   );

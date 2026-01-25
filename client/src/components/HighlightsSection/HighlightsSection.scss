@@ -1,0 +1,108 @@
+// SCSS for the HighlightsSection
+@use "sass:color";
+
+// === Variables ===
+$text-dark: #1e293b;
+$text-light: #6b7280;
+$card-bg: #ffffff;
+$section-bg: #f7f8fc; // A subtle off-white background
+$border-color: #f1f5f9;
+
+// === Gradient Colors ===
+$gradient-blue-start: #3b82f6;
+$gradient-blue-end: #60a5fa;
+
+$gradient-green-start: #10b981;
+$gradient-green-end: #34d399;
+
+$gradient-orange-start: #f97316;
+$gradient-orange-end: #fb923c;
+
+$gradient-purple-start: #a855f7;
+$gradient-purple-end: #c084fc;
+
+// === Main Section Styling ===
+.highlights-section-container {
+  padding: 2rem 1.5rem 4rem; 
+  background-color: $section-bg;
+  position: relative;
+  z-index: 10;
+}
+
+// === Grid Container for the Cards ===
+.highlights-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem; 
+  max-width: 1200px;
+  margin: 0 auto;
+  margin-top: -60px; // Pulls the cards up
+
+  // Responsive adjustments
+  @media (max-width: 1024px) {
+    grid-template-columns: repeat(2, 1fr);
+    margin-top: 2rem; 
+  }
+
+  @media (max-width: 767px) {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+}
+
+// === Individual Card Styling ===
+.highlight-card {
+  background: $card-bg;
+  border-radius: 24px;
+  padding: 2rem;
+  text-align: center;
+  box-shadow: 0 10px 30px -10px rgba(100, 116, 139, 0.12);
+  border: 1px solid $border-color;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+
+  &:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 40px -15px rgba(100, 116, 139, 0.2);
+  }
+
+  .highlight-icon-wrapper {
+    width: 64px;
+    height: 64px;
+    border-radius: 20px;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    // Applying specific gradients
+    &.--blue {
+      background-image: linear-gradient(135deg, $gradient-blue-end, $gradient-blue-start);
+    }
+    &.--green {
+      background-image: linear-gradient(135deg, $gradient-green-end, $gradient-green-start);
+    }
+    &.--orange {
+      background-image: linear-gradient(135deg, $gradient-orange-end, $gradient-orange-start);
+    }
+    &.--purple {
+      background-image: linear-gradient(135deg, $gradient-purple-end, $gradient-purple-start);
+    }
+  }
+
+  .highlight-value {
+    font-size: 2.25rem;
+    font-weight: 800;
+    color: $text-dark;
+    line-height: 1.2;
+  }
+
+  .highlight-label {
+    font-size: 1rem;
+    color: $text-light;
+    font-weight: 500;
+  }
+}

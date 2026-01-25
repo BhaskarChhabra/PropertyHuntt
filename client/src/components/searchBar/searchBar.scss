@@ -1,98 +1,212 @@
-@import "../../responsive.scss";
+@use "../../responsive.scss" as *;
+@use "sass:color";
 
-.searchBar {
-  .type {
+// --- NEW STYLING TO MATCH THE MOCKUP UI ---
+        
+$brand-blue: #4F46E5; // Main color from Hero text
+$text-dark: #333;
+$text-light: #888;
+$border-color: #e0e0e0;
+$bg-light: #f9fafb; // Light grey bg for buttons
 
+// Main container
+.new-search-mockup {
+  background-color: white;
+  padding: 1.5rem;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  margin-top: 2rem;
+  width: 100%;
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
 
-    button {
-      padding: 16px 36px;
-      border: 1px solid #999;
-      border-bottom: none;
+  @include sm {
+    padding: 1rem;
+    box-shadow: none;
+    background-color: transparent;
+  }
+
+  // --- 1. Top filter buttons (Buy/Rent) ---
+  .type-filters {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 1.5rem;
+
+    .type-btn {
+      padding: 10px 18px;
+      font-size: 1rem;
+      font-weight: 500;
+      color: $text-dark;
+      background-color: $bg-light;
+      border: 1px solid $border-color;
+      border-radius: 8px;
       cursor: pointer;
-      background-color: white;
-      text-transform: capitalize;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
 
+      &:hover {
+        background-color: color.adjust($bg-light, $lightness: -3%);
+        border-color: #ccc;
+      }
+
+      // Active state for Buy/Rent
       &.active {
-        background-color: black;
+        background-color: $brand-blue;
         color: white;
-      }
-
-      &:first-child {
-        border-top-left-radius: 5px;
-        border-right: none;
-      }
-      &:last-child {
-        border-top-right-radius: 5px;
-        border-left: none;
+        border-color: $brand-blue;
+        box-shadow: 0 4px 8px rgba($brand-blue, 0.2);
       }
     }
   }
 
-  form {
-    border: 1px solid #999;
+  // --- 2. Main search bar group ---
+  .search-input-group {
     display: flex;
-    justify-content: space-between;
-    height: 64px;
-    gap: 5px;
-
+    align-items: center;
+    gap: 12px;
+    background-color: white;
+    border: 1px solid $border-color;
+    border-radius: 12px;
+    padding: 10px;
+    
+    // Responsive break
     @include sm {
       flex-direction: column;
+      align-items: stretch;
+      gap: 1rem;
       border: none;
+      background-color: transparent;
+      padding: 0;
     }
 
-    input {
-      border: none;
-      padding: 0px 10px;
-      width: 200px;
-
-      @include lg {
-        padding: 0px 5px;
-
-        &:nth-child(2),
-        &:nth-child(3) {
-          width: 140px;
-        }
-      }
-      @include md {
-        width: 200px;
-        &:nth-child(2),
-        &:nth-child(3) {
-          width: 200px;
-        }
-      }
-
-      @include sm{
-        width: auto;
-        &:nth-child(2),
-        &:nth-child(3) {
-          width: auto;
-        }
-        padding: 20px;
-        border: 1px solid #999;
-      }
-    }
-
-    a{
+    // Location input (main flexible part)
+    .location-input {
       flex: 1;
-      background-color: #fece51;
+      display: flex;
+      align-items: center;
+      
+      @include sm {
+        background-color: white;
+        border: 1px solid $border-color;
+        border-radius: 12px;
+        padding: 14px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.04);
+      }
+
+      svg { // The '📍' icon
+        font-size: 1.25rem;
+        margin: 0 10px;
+        color: $text-light;
+        flex-shrink: 0;
+      }
+
+      input {
+        width: 100%;
+        border: none;
+        outline: none;
+        font-size: 1rem;
+        color: $text-dark;
+        background: transparent;
+
+        &::placeholder {
+          color: $text-light;
+        }
+
+        &:disabled {
+          background-color: #f5f5f5;
+          cursor: not-allowed;
+        }
+      }
+    }
+
+    // Generic button styling
+    button {
+      padding: 14px 18px;
+      font-size: 1rem;
+      font-weight: 500;
+      border-radius: 8px;
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: all 0.2s ease;
       display: flex;
       align-items: center;
       justify-content: center;
+      gap: 8px;
 
-      button {
-        border: none;
-        cursor: pointer;
-        background-color: #fece51;
-        
-        @include sm{
-          padding: 10px;
+      svg {
+        font-size: 1.2rem;
+      }
+    }
+
+    // Filter Button
+    .filter-btn {
+      background-color: $bg-light;
+      color: $text-dark;
+      border: 1px solid $border-color;
+
+      @include sm {
+        background-color: white;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.04);
+      }
+      
+      &:hover {
+        background-color: color.adjust($bg-light, $lightness: -3%);
+      }
+    }
+
+    // Search Button
+    .search-btn {
+      background-color: $brand-blue;
+      color: white;
+      
+      svg { // The '→' arrow
+        transition: transform 0.2s ease;
+      }
+
+      &:hover {
+        background-color: color.adjust($brand-blue, $lightness: -5%);
+        box-shadow: 0 4px 8px rgba($brand-blue, 0.2);
+        svg {
+          transform: translateX(3px);
         }
-        
-        img {
-          width: 24px;
-          height: 24px;
-        }
+      }
+
+      &:disabled {
+        background-color: #ccc;
+        cursor: not-allowed;
+      }
+    }
+    
+    // The Link component needs styling
+    .search-btn-link {
+      text-decoration: none;
+      
+      @include sm {
+        // Make button full width on mobile
+        display: block; 
       }
     }
   }
+}
+
+// Fix for Google Autocomplete dropdown
+.pac-container {
+  z-index: 1050 !important; // Ensure dropdown is on top
+  border-radius: 8px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  border: 1px solid #ddd;
+}
+.pac-item {
+  padding: 10px;
+  font-size: 1rem;
+  cursor: pointer;
+}
+.pac-item:hover {
+  background-color: #f5f5f5;
+}
+.pac-item-query {
+  font-weight: 500;
 }

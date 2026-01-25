@@ -85,3 +85,20 @@ export const logout = (req, res) => {
     .status(200)
     .json({ message: "Logout Successful" });
 };
+
+
+export const getCurrentUser = async (req, res) => {
+  try {
+    // Get JWT from cookie
+    const token = req.cookies.token;
+    if (!token) return res.status(401).json({ message: "Not authenticated" });
+
+    const payload = jwt.verify(token, process.env.JWT_SECRET || "default_secret");
+    const user = await prisma.user.findUnique({ where: { id: payload.id } });
+    if (!user) return res.status(404).json({ message: "User not found" });
+    const { password, ...userInfo } = user;
+    res.json(userInfo);
+  } catch (err) {
+    res.status(401).json({ message: "Invalid token" });
+  }
+};

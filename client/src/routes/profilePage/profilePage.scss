@@ -1,90 +1,329 @@
-@import "../../responsive.scss";
+@use "../../responsive.scss" as *;
+
+// --- NAYA BLUE/VIOLET THEME ---
+$brand-primary: #4F46E5; // 💙 Main Blue/Indigo
+$brand-primary-dark: #4338CA; // Hover
+$brand-violet: #8B5CF6; // 💜 Secondary Violet
+$brand-gradient: linear-gradient(90deg, $brand-primary 0%, $brand-violet 100%);
+$brand-gradient-hover: linear-gradient(
+  90deg,
+  $brand-primary-dark 0%,
+  $brand-violet 100%
+);
+
+// --- "EXTRA SUNDAR" ACCENTS ---
+$bg-chat: #fef6f3; // 🍑 Light Peach/Pink BG for Chat
+$brand-danger: #EF4444; // ❤️ Red for Logout
+$brand-danger-dark: #DC2626;
+
+// --- Standard BGs & Text ---
+$bg-page: #F9FAFB; // 🎨 Light Neutral BG
+$bg-card: #ffffff; // Cards
+$bg-accent-light: #EEF2FF; // Halka blue
+$text-dark: #111827;
+$text-light: #6B7280;
+$border-color: #E5E7EB;
 
 .profilePage {
-  display: flex;
+  // ... (aapka pehle ka saara profilePage styles yahan rahega) ...
+   display: flex;
+  flex-direction: column;
   height: 100%;
+  background-color: $bg-page;
 
-  @include md{
+  @include md {
     flex-direction: column;
     overflow: scroll;
   }
 
   .details {
-    flex: 3;
-    overflow-y: scroll;
-    padding-bottom: 50px;
+    flex-shrink: 0;
+    overflow-y: visible;
+    padding-bottom: 20px;
 
-    @include md{
-      flex:none;
+    @include md {
+      flex: none;
       height: max-content;
     }
 
-    .wrapper{
-      padding-right: 50px;
+    .wrapper {
+      padding: 30px;
       display: flex;
       flex-direction: column;
-      gap: 50px;
+      gap: 30px;
 
-      .title{
+      @include lg {
+        padding: 30px;
+      }
+      @include md {
+        padding: 20px;
+      }
+      @include sm {
+        padding: 20px;
+      }
+
+      .title {
         display: flex;
         align-items: center;
         justify-content: space-between;
+        padding-top: 0;
 
-        h1{
-          font-weight: 300;
+        h1 {
+          font-weight: 600;
+          color: $text-dark;
+          font-size: 2rem;
         }
 
-        button{
-          padding: 12px 24px;
-          background-color: #fece51;
-          cursor: pointer;
-          border: none;
-        }
-      }
-
-      .info{
-        display: flex;
-        flex-direction: column;
-        gap: 20px;
-
-        span{
-          display: flex;
-          align-items: center;
-          gap: 20px;
-        }
-
-        button{
-          width: 100px;
-          background-color: teal;
-          border: none;
-          color: white;
+        button {
           padding: 10px 20px;
           cursor: pointer;
-          border-radius: 5px;
+          border: none;
+          border-radius: 8px;
+          font-weight: 600;
+          color: white;
+          background: $brand-gradient;
+          transition: all 0.2s ease;
+
+          &:hover {
+            background: $brand-gradient-hover;
+            box-shadow: 0 4px 10px rgba($brand-primary, 0.3);
+            transform: translateY(-2px);
+          }
+        }
+      }
+
+      .info {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        background-color: $bg-card;
+        padding: 25px;
+        border-radius: 12px;
+        border: 1px solid $border-color;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+
+        span {
+          display: flex;
+          align-items: center;
+          gap: 15px;
+          font-size: 1rem;
+          color: $text-light;
+
+          b {
+            color: $text-dark;
+            font-weight: 600;
+          }
         }
 
-        img{
-          width: 40px;
-          height: 40px;
+        img {
+          width: 60px;
+          height: 60px;
           border-radius: 50%;
           object-fit: cover;
+          border: 3px solid $bg-accent-light;
+        }
+
+        button { // Logout Button
+          width: auto;
+          align-self: flex-start;
+          background-color: $brand-danger;
+          border: none;
+          color: white;
+          padding: 8px 16px;
+          cursor: pointer;
+          border-radius: 6px;
+          font-weight: 500;
+          font-size: 0.9rem;
+          margin-top: 10px;
+          transition: all 0.2s ease;
+
+          &:hover {
+            background-color: $brand-danger-dark;
+          }
+        }
+      }
+
+      // --- HORIZONTAL LIST STYLE ---
+      .list {
+        display: flex;
+        flex-direction: row;
+        overflow-x: auto;
+        gap: 20px;
+        padding: 10px 0 20px 0;
+
+        // --- Card Override for Profile Page ---
+        > * { // Targets the .card component directly inside .list
+          flex: 0 0 300px;
+          max-height: 400px;
+          height: 400px;
+
+          .imageContainer {
+            height: 220px;
+            position: relative; // Needed for absolute positioning of icons
+
+            // --- DELETE ICON STYLES ---
+            .deleteIcon {
+              position: absolute;
+              top: 10px;
+              right: 50px; // Position next to share icon
+              background-color: rgba(255, 0, 0, 0.7); // Red background
+              color: white; // White icon
+              border: none;
+              border-radius: 50%;
+              width: 32px;
+              height: 32px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              cursor: pointer;
+              z-index: 2;
+              box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+              transition: all 0.25s ease;
+
+              svg {
+                 display: block;
+              }
+
+              &:hover {
+                background-color: rgba(200, 0, 0, 0.9);
+                transform: scale(1.1);
+              }
+            }
+             // --- END DELETE ICON STYLES ---
+
+             .shareIcon {
+                 // Adjust if needed based on deleteIcon position
+             }
+          }
+
+          .textContainer {
+            padding: 10px;
+            gap: 3px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+
+            .address { font-size: 13px; }
+
+            .title {
+              font-size: 17px;
+              margin: 0;
+              overflow: hidden;
+              white-space: nowrap;
+              text-overflow: ellipsis;
+            }
+
+            .priceLabel { font-size: 11px; margin: 0; }
+            .price { font-size: 20px; margin: 0; }
+
+            .features {
+              gap: 8px;
+              font-size: 12px;
+              padding-bottom: 0;
+              margin-top: auto;
+              padding-right: 60px; // Space for icons
+              .feature { padding: 6px 10px; }
+            }
+
+            .bottom {
+              position: absolute;
+              bottom: 10px;
+              right: 10px;
+              padding-top: 0;
+              margin-top: 0;
+              border-top: none;
+
+              .actions {
+                gap: 8px;
+                justify-content: flex-end;
+
+                .contact-btn,
+                .save-btn {
+                  flex: 0 0 auto;
+                  background: none; border: none; padding: 4px;
+                  font-size: 0; color: transparent; cursor: pointer;
+                  img { width: 20px; height: 20px; display: block; }
+                  &:hover { background: none; border: none; transform: scale(1.1); }
+                }
+
+                .save-btn {
+                  &.saved {
+                    background: none; border: none;
+                    img { filter: invert(33%) sepia(98%) saturate(2811%) hue-rotate(227deg) brightness(97%) contrast(97%); }
+                  }
+                }
+              }
+            }
+          }
+        } // End Card Override
+      } // End .list
+    } // End .wrapper
+  } // End .details
+
+  // Chat Container (No Changes)
+  .chatContainer { /* ... */ }
+
+  // --- 👇 ADDED: Modal Styles ---
+  .modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.6); // Darker overlay
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000; // Ensure it's above everything
+    backdrop-filter: blur(3px); // Optional: Blur background
+  }
+
+  .modalContent {
+    background: $bg-card; // White background from variables
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+    width: 90%;
+    max-width: 450px; // Limit width
+    text-align: center;
+
+    p {
+      font-size: 1.1rem;
+      color: $text-dark; // Use text dark variable
+      margin-bottom: 25px;
+      line-height: 1.5;
+    }
+
+    .modalActions {
+      display: flex;
+      justify-content: center; // Center buttons
+      gap: 15px; // Space between buttons
+
+      button {
+        padding: 10px 25px;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+
+        &.confirmButton {
+          background-color: $brand-danger; // Red variable for confirm
+          color: white;
+          &:hover { background-color: $brand-danger-dark; } // Darker red variable
+        }
+
+        &.cancelButton {
+          background-color: $border-color; // Border color for cancel bg
+          color: $text-dark; // Dark text variable
+          &:hover { background-color: darken($border-color, 10%); } // Darken border color on hover
         }
       }
     }
   }
-  .chatContainer {
-    flex: 2;
-    background-color: #fcf5f3;
-    height: 100%;
+  // --- 👆 END Modal Styles ---
 
-    @include md{
-      flex:none;
-      height: max-content;
-    }
+} // End .profilePage
 
-    .wrapper{
-      padding: 0px 20px;
-      height: 100%;
-    }
-  }
-}

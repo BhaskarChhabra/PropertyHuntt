@@ -7,19 +7,37 @@ export const getPosts = async (req, res) => {
   try {
     const posts = await prisma.post.findMany({
       where: {
-        city: query.city
-          ? {
-              contains: query.city,
-              mode: "insensitive",
-            }
-          : undefined,
-        type: query.type || undefined,
-        property: query.property || undefined,
-        bedroom: parseInt(query.bedroom) || undefined,
-        price: {
-          gte: parseInt(query.minPrice) || undefined,
-          lte: parseInt(query.maxPrice) || undefined,
-        },
+        AND: [
+          // --- YEH SEARCH LOGIC BEHTAR BANAYI GAYI HAI ---
+          query.city
+            ? {
+                OR: query.city
+                  .split(",")
+                  .map((word) => word.trim())
+                  // Step 1: Sirf shuru ke 2 sabse zaroori shabdon ko lein
+                  .slice(0, 2) 
+                  .filter((word) => word.length > 2) // Chhote shabdon ko ignore karein
+                  .map((word) => ({
+                    // Step 2: Unhi zaroori shabdon se search karein
+                    OR: [
+                      { city: { contains: word, mode: "insensitive" } },
+                      { address: { contains: word, mode: "insensitive" } },
+                    ],
+                  })),
+              }
+            : {},
+          // --- END OF SEARCH LOGIC CHANGE ---
+
+          query.type ? { type: query.type } : {},
+          query.property ? { property: query.property } : {},
+          query.bedroom ? { bedroom: parseInt(query.bedroom) } : {},
+          {
+            price: {
+              gte: parseInt(query.minPrice) || undefined,
+              lte: parseInt(query.maxPrice) || undefined,
+            },
+          },
+        ],
       },
     });
 
@@ -29,6 +47,8 @@ export const getPosts = async (req, res) => {
     res.status(500).json({ message: "Failed to get posts" });
   }
 };
+
+// --- Baaki functions (getPost, addPost, etc.) waise hi rahenge ---
 
 export const getPost = async (req, res) => {
   const id = req.params.id;
@@ -96,9 +116,39 @@ export const addPost = async (req, res) => {
 };
 
 export const updatePost = async (req, res) => {
+    const id = req.params.id;
+    const tokenUserId = req.userId;
+    const { postData, postDetail } = req.body;
+
+    try {
+        const post = await prisma.post.findUnique({
+            where: { id },
+        });
+
+        if (post.userId !== tokenUserId) {
+            return res.status(403).json({ message: "Not Authorized!" });
+        }
+
+        const updatedPost = await prisma.post.update({
+            where: { id },
+            data: {
+                ...postData,
+                postDetail: {
+                    update: postDetail,
+                },
+            },
+        });
+
+        res.status(200).json(updatedPost);
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ message: "Failed to update post" });
+    }
+};
+
+export const deletePost = async (req, res) => {
   const id = req.params.id;
   const tokenUserId = req.userId;
-  const { postData, postDetail } = req.body;
 
   try {
     const post = await prisma.post.findUnique({
@@ -109,38 +159,14 @@ export const updatePost = async (req, res) => {
       return res.status(403).json({ message: "Not Authorized!" });
     }
 
-    const updatedPost = await prisma.post.update({
-      where: { id },
-      data: {
-        ...postData,
-        postDetail: {
-          update: postDetail,
-        },
-      },
-    });
-
-    res.status(200).json(updatedPost);
-  } catch (err) {
-    console.log(err);
-    res.status(500).json({ message: "Failed to update post" });
-  }
-};
-
-export const deletePost = async (req, res) => {
-  const id = req.params.id;
-  const tokenUserId = req.userId;
-
-  try {
     await prisma.post.delete({
-      where: {
-        id: id,
-        userId: tokenUserId,
-      },
+      where: { id },
     });
 
     res.status(200).json({ message: "Post deleted" });
   } catch (err) {
     console.log(err);
-    res.status(403).json({ message: "Not Authorized or Post not found!" });
+    res.status(500).json({ message: "Failed to delete post" });
   }
 };
+

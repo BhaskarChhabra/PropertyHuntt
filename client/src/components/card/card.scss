@@ -1,103 +1,334 @@
-@import "../../responsive.scss";
+@use "../../responsive.scss" as *;
+@use "sass:color";
+
+// --- COLOR PALETTE ---
+$brand-primary: #4F46E5; // 💙 Main Blue
+$brand-primary-dark: #4338ca; // Darker blue for hover
+$brand-green: #10B981; // 💚 Green for Buy Tag
+$brand-red: #ef4444; // Red for hover effects or alerts
+$text-dark: #111827;
+$text-light: #6B7280;
+$text-price: #4F46E5; // Blue price
+$border-color: #E5E7EB;
+$bg-card: #ffffff;
+$bg-feature: #EEF2FF; // Light blue for feature boxes
+
+// --- ✨ ANIMATIONS ---
+@keyframes cardPopIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.95) translateY(15px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes floatTag {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+
+// A generic fadeIn for notifications
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
 
 .card {
   display: flex;
-  gap: 20px;
+  flex-direction: column; // STACK IMAGE AND TEXT VERTICALLY
+  max-width: 550px; 
+  background-color: $bg-card; // WHITE BACKGROUND
+  border-radius: 12px; // Rounded corners
+  border: 1px solid $border-color;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04); // Softer shadow
+  overflow: hidden; // Ensure tags stay inside rounded corners
+
+  // --- Animation ---
+  opacity: 0;
+  animation: cardPopIn 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation-delay: calc(var(--card-index, 0) * 0.07s);
+
+  transition: transform 0.4s ease, box-shadow 0.4s ease;
+
+  // --- Hover ---
+  &:hover {
+    box-shadow: 0 10px 30px rgba(79, 70, 229, 0.15);
+    transform: translateY(-6px) scale(1.02);
+  }
 
   .imageContainer {
-    flex: 2;
-    height: 200px;
-
-    @include md {
-      display: none;
-    }
+    flex: none; // No flex grow needed
+    height: 320px; // Fixed height for image
+    width: 100%; 
+    position: relative; // For overlay tags
+    overflow: hidden;
 
     img {
       width: 100%;
       height: 100%;
       object-fit: cover;
-      border-radius: 10px;
+      transition: transform 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .copy-notification {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: rgba(0, 0, 0, 0.75);
+      color: white;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      z-index: 3;
+      pointer-events: none;
+      animation: fadeIn 0.3s ease;
+    }
+
+    &:hover img {
+      transform: scale(1.08) translateY(-6px);
+    }
+    
+    &::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        to bottom,
+        rgba(0, 0, 0, 0) 60%,
+        rgba(0, 0, 0, 0.25)
+      );
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+
+    &:hover::after {
+      opacity: 1;
+    }
+
+    .tags {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      display: flex;
+      gap: 8px;
+      z-index: 1;
+
+      .tag {
+        padding: 4px 10px;
+        border-radius: 6px;
+        color: white;
+        font-size: 12px;
+        font-weight: 600;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        
+        animation: floatTag 3s ease-in-out infinite;
+        animation-delay: calc(var(--tag-index, 0) * 0.2s);
+
+        &.property {
+          background-color: $brand-primary;
+        }
+        &.type {
+          background-color: $text-light;
+          &.buy {
+            background-color: $brand-green;
+          }
+        }
+      }
+    }
+    .shareIcon {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background-color: rgba(255, 255, 255, 0.8);
+        border: none;
+        border-radius: 50%;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 1;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: all 0.25s ease;
+
+        svg { // Target the SVG inside
+          transition: transform 0.3s ease;
+        }
+        
+        &:hover { 
+          background-color: white;
+          transform: scale(1.1);
+          svg {
+            transform: rotate(15deg);
+          }
+        }
     }
   }
+
   .textContainer {
-    flex: 3;
+    flex: 1; // Allow text container to grow
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    padding: 20px;
     gap: 10px;
 
-    img {
-      width: 16px;
-      height: 16px;
-    }
-
-    .title {
-      font-size: 20px;
-      font-weight: 600;
-      color: #444;
-      transition: all 0.4s ease;
-
-      &:hover {
-        color: #000;
-        scale: 1.01;
-      }
+    .topInfo {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
     }
 
     .address {
       font-size: 14px;
+      color: $text-light;
       display: flex;
       align-items: center;
       gap: 5px;
-      color: #888;
+      margin: 0;
+      img { width: 16px; height: 16px; opacity: 0.7; }
+    }
+
+    .views {
+        font-size: 13px;
+        color: $text-light;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        flex-shrink: 0;
+        img { width: 16px; height: 16px; opacity: 0.6; }
+    }
+
+    .title {
+      font-size: 18px;
+      font-weight: 600;
+      margin: 5px 0;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      a {
+        color: $text-dark;
+        text-decoration: none;
+        transition: color 0.3s ease;
+        &:hover { color: $brand-primary; }
+      }
+    }
+
+    .priceLabel {
+        font-size: 12px;
+        color: $text-light;
+        margin: 5px 0 0 0;
     }
 
     .price {
-      font-size: 20px;
-      font-weight: 300;
-      padding: 5px;
-      border-radius: 5px;
-      background-color: rgba(254, 205, 81, 0.438);
-      width: max-content;
+      font-size: 22px;
+      font-weight: 700;
+      color: $text-price;
+      margin: 0 0 10px 0;
     }
 
-    .bottom {
+    .features {
       display: flex;
-      justify-content: space-between;
       gap: 10px;
+      font-size: 13px;
+      margin-top: auto; // Push features to bottom of its space
+      padding-bottom: 15px; // Add space before the action buttons
 
-      .features {
+      .feature {
         display: flex;
-        gap: 20px;
-        font-size: 14px;
+        align-items: center;
+        gap: 5px;
+        background-color: $bg-feature;
+        padding: 8px 12px;
+        border-radius: 8px;
+        color: $brand-primary;
+        font-weight: 500;
+        transition: background-color 0.3s ease, transform 0.3s ease;
 
-        .feature {
-          display: flex;
-          align-items: center;
-          gap: 5px;
-          background-color: whitesmoke;
-          padding: 5px;
-          border-radius: 5px;
+        img {
+           width: 16px;
+           height: 16px;
+           filter: invert(33%) sepia(98%) saturate(2811%) hue-rotate(227deg) brightness(97%) contrast(97%);
+           opacity: 0.8;
+        }
+
+        &:hover {
+          background-color: color.scale($bg-feature, $lightness: -8%);
+          transform: translateY(-2px);
         }
       }
+    }
 
-      .icons {
+    // --- BUTTONS SECTION (FIXED & STYLED) ---
+    .bottom {
+      margin-top: auto; // Push to the very bottom
+      padding-top: 15px;
+      border-top: 1px solid $border-color;
+      
+      .actions {
         display: flex;
-        gap: 20px;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
 
-        .icon {
-          border: 1px solid #999;
-          padding: 2px 5px;
-          border-radius: 5px;
-          cursor: pointer;
+        .contact-btn, .save-btn {
+          flex: 1; // Make buttons take equal space
           display: flex;
           align-items: center;
           justify-content: center;
+          gap: 8px;
+          padding: 10px;
+          border-radius: 8px;
+          border: 1px solid $border-color;
+          background: none;
+          cursor: pointer;
+          font-size: 14px;
+          font-weight: 500;
+          transition: all 0.2s ease-in-out;
 
+          img {
+            width: 16px;
+            height: 16px;
+          }
+        }
+        
+        .contact-btn {
+          background-color: $brand-primary;
+          color: white;
+          border-color: $brand-primary;
+          
           &:hover {
-            background-color: lightgray;
+            background-color: $brand-primary-dark;
+            border-color: $brand-primary-dark;
+            transform: translateY(-2px);
+          }
+        }
+
+        .save-btn {
+          background-color: $bg-card;
+          color: $text-light;
+          
+          &:hover {
+            border-color: $text-dark;
+            color: $text-dark;
+          }
+
+          &.saved {
+            background-color: $bg-feature;
+            color: $brand-primary;
+            border-color: $brand-primary;
+            font-weight: 600;
           }
         }
       }
     }
   }
 }
+
