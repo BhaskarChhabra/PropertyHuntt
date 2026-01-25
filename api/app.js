@@ -1,3 +1,6 @@
+import dotenv from "dotenv";
+dotenv.config();
+import "./lib/googleStrategy.js";
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
@@ -31,7 +34,7 @@ axios.defaults.httpAgent = new httpAgent.Agent({ keepAlive: true, proxy: false }
 axios.defaults.httpsAgent = new https.Agent({ keepAlive: true, proxy: false });
 
 // Allowed origins (Updated and simplified for clarity)
-const VERCEL_CLIENT = "https://property-huntt-prvt.vercel.app";
+const VERCEL_CLIENT = "https://localhost:5173"; // Vercel Frontend URL
 
 const allowedOrigins = [
     "http://localhost:5173", // Local Development

@@ -1,6 +1,6 @@
 import express from 'express';
 import {
-    generateDescription,
+    // generateDescription,
     generateInvestmentInsights,
     analyzeMyListings,
     getFreeLocationTrends
@@ -9,7 +9,7 @@ import {
 const router = express.Router();
 
 // Route 1: Nayi property ke liye description banata hai (Form ke liye)
-router.post('/description', generateDescription);
+// router.post('/description', generateDescription);
 
 // Route 2: Investment insights banata hai (Form ke liye)
 router.post('/insights', generateInvestmentInsights);

@@ -27,24 +27,24 @@ class AIService {
    * FEATURE 1: Description
    * (Ismein koi badlav nahi)
    */
-  async generateDescription(propertyData) {
-    const prompt = this._buildDescriptionPrompt(propertyData);
-    console.log("🧠 AIService: Generating property description...");
+  // async generateDescription(propertyData) {
+  //   const prompt = this._buildDescriptionPrompt(propertyData);
+  //   console.log("🧠 AIService: Generating property description...");
     
-    try {
-      const result = await this.model.generateContent(prompt);
-      const response = await result.response;
-      const generatedText = response.text().trim();
-      if (!generatedText || generatedText.length < 50) {
-        throw new Error("AI returned an empty or blocked description.");
-      }
-      console.log("✅ AIService: Description generated successfully.");
-      return generatedText;
-    } catch (error) {
-      console.error("❌ Gemini API Error (generateDescription):", error);
-      throw new Error(`Failed to generate description: ${error.message}`);
-    }
-  }
+  //   try {
+  //     const result = await this.model.generateContent(prompt);
+  //     const response = await result.response;
+  //     const generatedText = response.text().trim();
+  //     if (!generatedText || generatedText.length < 50) {
+  //       throw new Error("AI returned an empty or blocked description.");
+  //     }
+  //     console.log("✅ AIService: Description generated successfully.");
+  //     return generatedText;
+  //   } catch (error) {
+  //     console.error("❌ Gemini API Error (generateDescription):", error);
+  //     throw new Error(`Failed to generate description: ${error.message}`);
+  //   }
+  // }
 
   /**
    * FEATURE 2: Investment Insights
