@@ -10,9 +10,11 @@ import ProfileUpdatePage from "./routes/profileUpdatePage/profileUpdatePage";
 import NewPostPage from "./routes/newPostPage/newPostPage";
 import AIPropertyHub from "./routes/aiPropertyHub/AIPropertyHub"; // new page
 import InvestmentPage from "./routes/investmentPage/InvestmentPage"; // fixed casing
-
+import Contact from "./routes/contact/contact";
+import Footer from "./components/footer/Footer";
 // 👇 --- 1. IMPORT YOUR NEW PAGE ---
 import ChatPage from "./routes/chatPage/ChatPage";
+import About from "./routes/about/about";
 
 // 👇 --- 2. IMPORT YOUR NEW LOADER ---
 import {
@@ -67,6 +69,15 @@ function App() {
           path: "/investment-insights",
           element: <InvestmentPage />,
         },
+        {
+          path: "/contact",
+          element: <Contact />,
+        }
+        ,
+        {
+          path: "/about",
+          element: <About />,
+        }
       ],
     },
     {
